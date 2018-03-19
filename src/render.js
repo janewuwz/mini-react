@@ -1,5 +1,4 @@
 export function render (component, Node) {
-  console.log('RENDER')
   let node = Node
   let resu
   if (typeof Node === 'function') {
@@ -7,11 +6,12 @@ export function render (component, Node) {
     node.ComponentWillMount()
     resu = node.render()
     node.ComponentDidMount()
+  } else {
+    node.ComponentWillUpdate()
+    resu = node.render()
+    node.ComponentDidUpdate()
+    node.ComponentWillUnMount()
   }
-  node.ComponentWillUpdate()
-  resu = node.render()
-  node.ComponentDidUpdate()
-  node.ComponentWillUnMount()
 
   if (resu) {
     component.appendChild(resu)
