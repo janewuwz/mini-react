@@ -1,3 +1,5 @@
+import {realRender} from './compileEle'
+
 export function render (component, Node) {
   let node = Node
   let resu
@@ -5,6 +7,7 @@ export function render (component, Node) {
     node = new Node()
     node.ComponentWillMount()
     resu = node.render()
+    realRender(window.tree)
     node.ComponentDidMount()
   } else {
     node.ComponentWillUpdate()
@@ -12,8 +15,8 @@ export function render (component, Node) {
     node.ComponentDidUpdate()
     node.ComponentWillUnMount()
   }
-
-  if (resu) {
+  console.log('render')
+  if (resu && typeof resu === 'Node') {
     component.appendChild(resu)
   }
   // component.appendChild(resu)

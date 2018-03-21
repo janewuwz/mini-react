@@ -3,6 +3,38 @@ import domObj from './domObj'
 import uuid from 'node-uuid'
 import generateTree from './domTree'
 
+export function realRender (tree) {
+  Object.keys(tree).forEach((item, index) => {
+    const value = tree[item]
+    const ele = document.createElement(value.type)
+    let ParentDom
+    if (value.parent) {
+      ParentDom = document.querySelectorAll(`[data-id="${value.parent}"]`)
+    } else {
+      ParentDom = document.getElementById('root')
+    }
+    if (value.attr.length > 0) {
+      value.attr.forEach(val => {
+        console.log(val)
+        // ele.setAttribute(Object.keys(val)[0], val)
+      })
+    }
+    if (ParentDom.length === undefined) {
+      ParentDom.appendChild(ele)
+    } else {
+      for (var vv of ParentDom) {
+        vv.appendChild(ele)
+      }
+    }
+    ele.setAttribute('data-id', item)
+    if (value.child.length > 0) {
+      value.child.forEach((sub, count) => {
+        realRender(sub)
+      })
+    }
+  })
+}
+
 export function parseDomTree (tree, diffTarget) {
   if (diffTarget !== undefined && document.getElementById(diffTarget.id)) {
     const targetDom = document.getElementById(diffTarget.id)

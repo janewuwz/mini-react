@@ -1,4 +1,4 @@
-import Component from './wz'
+import {Component, makeElement} from './wz'
 import {render} from './render'
 import {compileEle, parseDomTree, diff} from './compileEle'
 import domTree from './domTree'
@@ -9,7 +9,7 @@ class Instance extends Component {
   constructor() {
     super()
     this.state = {
-      cur: undefined
+      cur: 'wz'
     }
   }
   ComponentWillMount () {
@@ -19,7 +19,7 @@ class Instance extends Component {
     // console.log('will mount')
   }
   ComponentDidMount () {
-    this.setState({cur: '4'})
+    // this.setState({cur: '4'})
     // console.log('did mount')
   }
 
@@ -42,10 +42,16 @@ class Instance extends Component {
   }
 
   render () {
-    // console.log(this.state.cur)
-    return diff(this.state.cur, this.click1)
-    // return diff(domTree, this.click1, '4')
-    // return compileEle('button', this.state.title, this.click)
+    /**
+     * <div>
+     *  <span><h1></h1></span>
+     *  <span></span>
+     * </div>
+     */
+    const {cur} = this.state
+    var a = makeElement('div', { id: 'foo' }, makeElement('span', {name: 'bar'}, makeElement('h1', {name: 'haha'}, 'h tag')), makeElement('span', {name: 'baz'}, cur))
+    
+    return a
   }
 }
 
