@@ -1,6 +1,3 @@
-// import diff from './diff'
-import domObj from './domObj'
-import uuid from 'node-uuid'
 import generateTree from './domTree'
 
 export function realRender (tree) {
@@ -70,8 +67,6 @@ export function parseDomTree (tree, diffTarget) {
   })
 }
 
-let currentState
-let prevState
 let states = []
 
 export function diff (newState, click1) {
@@ -97,18 +92,4 @@ export function diff (newState, click1) {
   //   return
   // }
   parseDomTree(oldTree, diffTarget)
-}
-
-const init = []
-
-function walkTree (tree, target) {
-  Object.keys(tree).forEach((item, index) => {
-    if (item === target) {
-      init.push(tree[item])
-    } else {
-      tree[item].child.forEach((v, k) => {
-        walkTree(v, target)
-      })
-    }
-  })
 }
