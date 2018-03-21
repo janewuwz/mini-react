@@ -16,7 +16,13 @@ export function realRender (tree) {
     if (value.attr.length > 0) {
       value.attr.forEach(val => {
         const k = Object.keys(val)[0]
-        ele.setAttribute(k, val[k])
+        const v = val[k]
+
+        if (typeof v === 'function') {
+          ele[k] = v
+        } else {
+          ele.setAttribute(k, val[k])
+        }
       })
     }
     if (value.txt) {

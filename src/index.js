@@ -44,12 +44,12 @@ class Instance extends Component {
   render () {
     /**
      * <div>
-     *  <span><h1></h1></span>
-     *  <span></span>
+     *  <span><h1 name='haha'>h tag</h1></span>
+     *  <span name='baz'>{cur}</span>
      * </div>
      */
     const {cur} = this.state
-    var a = makeElement('div', { id: 'foo' }, makeElement('span', {name: 'bar'}, makeElement('h1', {name: 'haha'}, 'h tag')), makeElement('span', {name: 'baz'}, cur))
+    var a = makeElement('div', { id: 'foo' }, makeElement('span', {name: 'bar'}, makeElement('h1', {name: 'haha', onclick: this.click1}, 'h tag')), makeElement('span', {name: 'baz'}, cur))
     
     return a
   }

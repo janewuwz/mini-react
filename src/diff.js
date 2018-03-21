@@ -16,6 +16,9 @@ export function walkObj (prevs, curs) {
     }
     if (item === 'txt') {
       if (cur.txt !== prev.txt) {
+        // console.log(cur)
+        // console.log(prev)
+        window.tree = window.prevTree
         const tar = document.querySelectorAll(`[data-id="${preRootKey}"]`)
         for (var vv of tar) {
           vv.childNodes[0].nodeValue = cur.txt
