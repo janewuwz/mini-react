@@ -1,5 +1,6 @@
 import {render} from './render'
 import uuid from 'node-uuid'
+import * as _ from 'lodash'
 
 function updateState (self) {
   return new Promise((resolve, reject) => {
@@ -15,45 +16,43 @@ function updateState (self) {
 const root = document.getElementById('root')
 let parents = [root]
 let childs = []
-let tree = {}
-window.tree = tree
+window.tree = {}
 var a = 0
-let temp = []
+window.temp = []
 export function makeElement () {
-  a++
-  if (a === 4) {
-    console.log(tree)
-  }
   const vid = uuid.v4()
-  tree[vid] = {}
-  tree[vid].type = arguments[0]
-  tree[vid].child = []
-  tree[vid].attr = []
-  temp.push({[vid]: tree[vid]})
+  window.tree[vid] = {}
+  window.tree[vid].type = arguments[0]
+  window.tree[vid].child = []
+  window.tree[vid].attr = []
+  window.temp.push({[vid]: window.tree[vid]})
   const attr = arguments[1]
   if (attr !== null) {
     Object.entries(attr).map(item => {
-      tree[vid].attr.push({[item[0]]: item[1]})
+      window.tree[vid].attr.push({[item[0]]: item[1]})
     })
   }
   const rest = [...arguments].slice(2)
   if (rest.length === 1 && typeof rest[0] !== 'string') {
-    const l = temp.shift()
+    const l = window.temp.shift()
     const key = Object.keys(l)[0]
-    delete tree[key]
+    delete window.tree[key]
     l[key].parent = vid
-    tree[vid] && tree[vid].child.push(l)
+    window.tree[vid] && window.tree[vid].child.push(l)
+  }
+  if (rest.length === 1 && typeof rest[0] === 'string') {
+    window.tree[vid].txt = rest[0]
   }
   if (rest.length > 1) {
-    const nn = temp.slice(0, temp.length - 1)
+    const nn = window.temp.slice(0, window.temp.length - 1)
     nn.forEach(item => {
       const k = Object.keys(item)[0]
-      delete tree[k]
+      delete window.tree[k]
       item[k].parent = vid
-      tree[vid] && tree[vid].child.push(item)
+      window.tree[vid] && window.tree[vid].child.push(item)
     })
   }
-  return tree[vid]
+  return window.tree[vid]
 
   // if (other.length === 1 && typeof other[0] !== 'function') {
   //   tree[vid].
@@ -120,6 +119,8 @@ function parse (content, type, attr) {
   return dom
 }
 
+window.prevTree = {}
+
 export class Component {
   constructor () {
     this.jsx = null
@@ -127,7 +128,8 @@ export class Component {
     this.batchedState = []
     this.batchedCb = []
     this.setState = (newState, cb) => {
-      this.batchedState.push(newState)
+      // window.prevTree = {...window.}
+      // this.batchedState.push(newState)
       // this.batched.forEach(item => {
       //   this.state = {
       //     ...this.state,
@@ -136,14 +138,16 @@ export class Component {
       //   item.cb && item.cb()
       //   render(document.getElementById('root'), this)
       // })
-      // this.state = {
-      //   ...this.state,
-      //   ...newState
-      // }
-      // render(document.getElementById('root'), this)
-      updateState(this).then(cb && cb())
+      this.state = {
+        ...this.state,
+        ...newState
+      }
+      // console.log(this.state)
+      render(document.getElementById('root'), this)
+      // updateState(this).then(cb && cb())
     }
   }
+
   ComponentWillMount () {
 
   }

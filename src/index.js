@@ -19,7 +19,7 @@ class Instance extends Component {
     // console.log('will mount')
   }
   ComponentDidMount () {
-    // this.setState({cur: '4'})
+    this.setState({cur: '4'})
     // console.log('did mount')
   }
 

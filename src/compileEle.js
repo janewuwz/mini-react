@@ -15,9 +15,13 @@ export function realRender (tree) {
     }
     if (value.attr.length > 0) {
       value.attr.forEach(val => {
-        console.log(val)
-        // ele.setAttribute(Object.keys(val)[0], val)
+        const k = Object.keys(val)[0]
+        ele.setAttribute(k, val[k])
       })
+    }
+    if (value.txt) {
+      const txtNode = document.createTextNode(value.txt)
+      ele.appendChild(txtNode)
     }
     if (ParentDom.length === undefined) {
       ParentDom.appendChild(ele)
