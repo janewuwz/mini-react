@@ -1,6 +1,10 @@
 import {Component, makeElement} from './wz'
 
 class Child extends Component {
+  constructor () {
+    super()
+    console.log('child constructor')
+  }
   ComponentWillMount () {
     console.log('child will mount')
   }
@@ -19,11 +23,11 @@ class Child extends Component {
   render () {
     console.log('child render')
     /**
-     * <div id='child'>
-     *  <div>I'm Child</div>
-     * </div>
+     *
+     *  <div id='child'>I'm Child</div>
+     *
      */
-    return makeElement('div', { id: 'child' }, "I'm Child")
+    return makeElement('div', { id: 'child' }, "I'm Two")
   }
 }
 

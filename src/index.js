@@ -3,6 +3,10 @@ import {render} from './render'
 import Child from './Child'
 
 class Parent extends Component {
+  constructor () {
+    super()
+    console.log('parent constructor')
+  }
   ComponentWillMount () {
     console.log('Parent will mount')
   }
@@ -24,7 +28,7 @@ class Parent extends Component {
      * </div>
      */
     console.log('parent render')
-    return makeElement('div', { id: 'content' }, makeElement('div', {}, "I'm parent"), makeElement(Child, {}, ''))
+    return makeElement('div', { id: 'content' }, makeElement('div', {}, "I'm One"), makeElement(Child, {}, ''))
   }
 }
 

@@ -15,16 +15,22 @@ import uuid from 'node-uuid'
 window.tree = {}
 window.temp = []
 export function makeElement () {
-  const vid = uuid.v4()
-  window.tree[vid] = {}
+  // if (typeof arguments[0] === 'function') {
+  //   // child component
+  //   render(undefined, arguments[0])
+  //   return
+  // } else {
+  //   window.tree[vid].type = arguments[0]
+  // }
+
   if (typeof arguments[0] === 'function') {
     // child component
     render(undefined, arguments[0])
     return
-  } else {
-    window.tree[vid].type = arguments[0]
   }
-
+  const vid = uuid.v4()
+  window.tree[vid] = {}
+  window.tree[vid].type = arguments[0]
   window.tree[vid].child = []
   window.tree[vid].attr = []
   window.temp.push({[vid]: window.tree[vid]})
@@ -60,6 +66,9 @@ export function makeElement () {
       window.tree[vid] && window.tree[vid].child.push(item)
     })
   }
+  // if (window.tree[vid].type === undefined) {
+  //   window.tree[vid].type = 'div'
+  // }
 
   return window.tree[vid]
 }
