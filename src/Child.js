@@ -1,31 +1,30 @@
-import Component from './wz'
-import {render} from './render'
-import compileEle from './compileEle'
-// const jsx = document.createElement('div')
-// jsx.textContent = 'wz'
+import {Component, makeElement} from './wz'
 
 class Child extends Component {
   ComponentWillMount () {
-    // this.setState({title: 1})
-    // this.setState({title: 2})
-    // this.setState({title: this.state.title++})
-    // console.log('will mount')
+    console.log('child will mount')
   }
   ComponentDidMount () {
-    // console.log('did mount')
+    console.log('child did mount')
   }
 
   ComponentWillUpdate () {
-    // console.log('will update')
+    console.log('child will update')
   }
 
   ComponentDidUpdate () {
-    // console.log('did update')
+    console.log('child did update')
   }
 
   render () {
-    return compileEle('div', 'child', null)
+    console.log('child render')
+    /**
+     * <div id='child'>
+     *  <div>I'm Child</div>
+     * </div>
+     */
+    return makeElement('div', { id: 'child' }, "I'm Child")
   }
 }
 
-render(document.getElementById('root'), Child)
+export default Child

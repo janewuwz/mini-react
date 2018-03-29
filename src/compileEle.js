@@ -2,6 +2,9 @@
 export function realRender (tree) {
   Object.keys(tree).forEach((item, index) => {
     const value = tree[item]
+    if (value.type === undefined) {
+      return
+    }
     const ele = document.createElement(value.type)
     let ParentDom
     if (value.parent) {
@@ -9,7 +12,7 @@ export function realRender (tree) {
     } else {
       ParentDom = document.getElementById('root')
     }
-    if (value.attr.length > 0) {
+    if (value && value.attr && value.attr.length > 0) {
       value.attr.forEach(val => {
         const k = Object.keys(val)[0]
         const v = val[k]
@@ -21,7 +24,7 @@ export function realRender (tree) {
         }
       })
     }
-    if (value.txt) {
+    if (value.txt !== undefined) {
       const txtNode = document.createTextNode(value.txt)
       ele.appendChild(txtNode)
     }
@@ -33,7 +36,7 @@ export function realRender (tree) {
       }
     }
     ele.setAttribute('data-id', item)
-    if (value.child.length > 0) {
+    if (value && value.child && value.child.length > 0) {
       value.child.forEach((sub, count) => {
         realRender(sub)
       })

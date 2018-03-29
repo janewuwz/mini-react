@@ -1,6 +1,5 @@
 import {render} from './render'
 import uuid from 'node-uuid'
-
 // function updateState (self) {
 //   return new Promise((resolve, reject) => {
 //     self.batchedState.forEach(element => {
@@ -18,7 +17,14 @@ window.temp = []
 export function makeElement () {
   const vid = uuid.v4()
   window.tree[vid] = {}
-  window.tree[vid].type = arguments[0]
+  if (typeof arguments[0] === 'function') {
+    // child component
+    render(undefined, arguments[0])
+    return
+  } else {
+    window.tree[vid].type = arguments[0]
+  }
+
   window.tree[vid].child = []
   window.tree[vid].attr = []
   window.temp.push({[vid]: window.tree[vid]})
@@ -29,16 +35,22 @@ export function makeElement () {
     })
   }
   const rest = [...arguments].slice(2)
-  if (rest.length === 1 && typeof rest[0] !== 'string') {
+  if (rest.length === 1 && typeof rest[0] !== 'string' && typeof rest[0] !== 'number') {
     const l = window.temp.shift()
     const key = Object.keys(l)[0]
     delete window.tree[key]
     l[key].parent = vid
     window.tree[vid] && window.tree[vid].child.push(l)
   }
+  // textnode为字符串
   if (rest.length === 1 && typeof rest[0] === 'string') {
     window.tree[vid].txt = rest[0]
   }
+  // textnode为数字
+  if (rest.length === 1 && typeof rest[0] === 'number') {
+    window.tree[vid].txt = rest[0]
+  }
+  // 多个childnode
   if (rest.length > 1) {
     const nn = window.temp.slice(0, window.temp.length - 1)
     nn.forEach(item => {
@@ -48,6 +60,7 @@ export function makeElement () {
       window.tree[vid] && window.tree[vid].child.push(item)
     })
   }
+
   return window.tree[vid]
 }
 

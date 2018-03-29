@@ -1,58 +1,31 @@
 import {Component, makeElement} from './wz'
 import {render} from './render'
-import {compileEle, parseDomTree, diff} from './compileEle'
-import domTree from './domTree'
-// const jsx = document.createElement('div')
-// jsx.textContent = 'wz'
+import Child from './Child'
 
-class Instance extends Component {
-  constructor() {
-    super()
-    this.state = {
-      cur: 'wz'
-    }
-  }
+class Parent extends Component {
   ComponentWillMount () {
-    
-    // this.setState({title: 2})
-    // this.setState({title: this.state.title++})
-    // console.log('will mount')
+    console.log('Parent will mount')
   }
   ComponentDidMount () {
-    this.setState({cur: '4'})
-    // console.log('did mount')
+    console.log('Parent did mount')
+    this.setState({})
   }
-
   ComponentWillUpdate () {
-    // console.log('will update')
+    console.log('parent will upadte')
   }
-
   ComponentDidUpdate () {
-    // console.log('did update')
+    console.log('parent did update')
   }
-
-  click = () => {
-    const newNum = this.state.title + 1
-    this.setState({title: newNum})
-  }
-
-  click1 = () => {
-    console.log('click1-3')
-    this.setState({cur: '90'})
-  }
-
   render () {
     /**
-     * <div>
-     *  <span><h1 name='haha'>h tag</h1></span>
-     *  <span name='baz'>{cur}</span>
+     * <div id='content'>
+     *  <div>I'm parent</div>
+     *  <div>I'm Child</div>
      * </div>
      */
-    const {cur} = this.state
-    var a = makeElement('div', { id: 'foo' }, makeElement('span', {name: 'bar'}, makeElement('h1', {name: 'haha', onclick: this.click1}, 'h tag')), makeElement('span', {name: 'baz'}, cur))
-    
-    return a
+    console.log('parent render')
+    return makeElement('div', { id: 'content' }, makeElement('div', {}, "I'm parent"), makeElement(Child, {}, ''))
   }
 }
 
-render(document.getElementById('root'), Instance)
+render(document.getElementById('root'), Parent)

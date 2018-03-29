@@ -7,7 +7,16 @@ import diff from './diff'
 export function render (component, Node) {
   let node = Node
   let resu
+  if (component === undefined) {
+    // child component
+    node = new Node()
+    node.ComponentWillMount()
+    const childres = node.render()
+    node.ComponentDidMount()
+    return childres
+  }
   if (typeof Node === 'function') {
+    // init mount
     node = new Node()
     node.ComponentWillMount()
     resu = node.render()
