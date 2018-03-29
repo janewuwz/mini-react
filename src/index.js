@@ -1,35 +1,32 @@
 import {Component, makeElement} from './wz'
 import {render} from './render'
-import Child from './Child'
 
-class Parent extends Component {
-  constructor () {
+class Instance extends Component {
+  constructor() {
     super()
-    console.log('parent constructor')
+    this.state = {
+      count: 1
+    }
   }
-  ComponentWillMount () {
-    console.log('Parent will mount')
+
+  click1 = () => {
+    this.setState({count: this.state.count + 1})
   }
-  ComponentDidMount () {
-    console.log('Parent did mount')
-    this.setState({})
+
+  click2 = () => {
+    this.setState({count: this.state.count - 1})
   }
-  ComponentWillUpdate () {
-    console.log('parent will upadte')
-  }
-  ComponentDidUpdate () {
-    console.log('parent did update')
-  }
+
   render () {
     /**
-     * <div id='content'>
-     *  <div>I'm parent</div>
-     *  <div>I'm Child</div>
+     * <div>
+     *  <span><h1 name='haha'>h tag</h1></span>
+     *  <span name='baz'>{count}</span>
      * </div>
      */
-    console.log('parent render')
-    return makeElement('div', { id: 'content' }, makeElement('div', {}, "I'm One"), makeElement(Child, {}, ''))
+    const {count} = this.state
+    return makeElement('div', { id: 'foo' }, makeElement('span', {name: 'bar'}, makeElement('h2', {name: 'haha', onclick: this.click1}, 'increase')), makeElement('span', {name: 'baz'}, count), makeElement('h2', {onclick: this.click2}, 'decrease'))
   }
 }
 
-render(document.getElementById('root'), Parent)
+render(document.getElementById('root'), Instance)
