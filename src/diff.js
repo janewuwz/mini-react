@@ -1,28 +1,29 @@
 import * as _ from 'lodash'
 
-export default function diff (nextTree, curTree) {
-  walkObj(curTree, nextTree)
+export default function diff (curTree, prevTree) {
+  walkObj(prevTree, curTree)
 }
 
-export function walkObj (curs, nexts) {
-  const next = Object.values(nexts)[0]
-  const preRootKey = Object.keys(nexts)[0]
-  const cur = Object.values(nexts)[0]
-  Object.keys(next).map(item => {
+export function walkObj (prevs, curs) {
+  const cur = Object.values(curs)[0]
+  const preRootKey = Object.keys(prevs)[0]
+  const prev = Object.values(prevs)[0]
+  Object.keys(cur).map(item => {
     if (item === 'child') {
-      cur.child.forEach((element, ind) => {
-        walkObj(element, next.child[ind])
+      prev.child.forEach((element, ind) => {
+        walkObj(element, cur.child[ind])
       })
     }
 
     if (item === 'txt') {
-      // console.log(next.txt)
       // console.log(cur.txt)
-      if (next.txt !== cur.txt) {
-        // window.tree = window.nextTree
+      // console.log(prev.txt)
+      if (cur.txt !== prev.txt) {
+        window.tree = window.prevTree
+        prev.txt = cur.txt
         const tar = document.querySelectorAll(`[data-id="${preRootKey}"]`)
         for (var vv of tar) {
-          vv.childNodes[0].nodeValue = next.txt
+          vv.childNodes[0].nodeValue = prev.txt
         }
       }
     }
