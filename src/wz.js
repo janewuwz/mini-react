@@ -22,13 +22,25 @@ export function makeElement () {
   // } else {
   //   window.tree[vid].type = arguments[0]
   // }
-
+  const originAttr = ['name', 'id', 'type']
   if (typeof arguments[0] === 'function') {
+    const resetProps = {}
     // child component
-    render(undefined, arguments[0])
+
+    if (arguments[1]) {
+      // child props
+      Object.entries(arguments[1]).map(item => {
+        // props attr
+        if (!originAttr.includes(item[0])) {
+          resetProps[item[0]] = item[1]
+        }
+      })
+    }
+    render(undefined, arguments[0], resetProps)
     return
   }
   const vid = uuid.v4()
+
   window.tree[vid] = {}
   window.tree[vid].type = arguments[0]
   window.tree[vid].child = []
@@ -36,8 +48,12 @@ export function makeElement () {
   window.temp.push({[vid]: window.tree[vid]})
   const attr = arguments[1]
   if (attr !== null) {
+    // attr
     Object.entries(attr).map(item => {
-      window.tree[vid].attr.push({[item[0]]: item[1]})
+        // 一般属性
+      if (originAttr.includes(item[0])) {
+        window.tree[vid].attr.push({[item[0]]: item[1]})
+      }
     })
   }
   const rest = [...arguments].slice(2)
@@ -79,6 +95,7 @@ export class Component {
   constructor () {
     this.jsx = null
     this.state = {}
+    this.props = {}
     this.batchedState = []
     this.batchedCb = []
     this.setState = (newState, cb) => {

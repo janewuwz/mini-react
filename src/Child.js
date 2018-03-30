@@ -27,7 +27,7 @@ class Child extends Component {
      *  <div id='child'>I'm Child</div>
      *
      */
-    return makeElement('div', { id: 'child' }, "I'm Two")
+    return makeElement('div', { id: 'child' }, this.props.content)
   }
 }
 

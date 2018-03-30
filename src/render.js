@@ -4,7 +4,7 @@ import diff from './diff'
 
 // export function
 let child
-export function render (component, Node) {
+export function render (component, Node, resetProps) {
   let node = Node
   let resu
 
@@ -12,6 +12,9 @@ export function render (component, Node) {
     // child component
     if (child === undefined) {
       child = new Node()
+      if (resetProps) {
+        child.props = {...resetProps}
+      }
       child.ComponentWillMount()
       child.render()
       child.ComponentDidMount()
