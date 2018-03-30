@@ -16,8 +16,6 @@ export function walkObj (prevs, curs) {
     }
 
     if (item === 'txt') {
-      // console.log(cur.txt)
-      // console.log(prev.txt)
       if (cur.txt !== prev.txt) {
         window.tree = window.prevTree
         prev.txt = cur.txt
