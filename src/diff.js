@@ -11,7 +11,7 @@ export default function diff (curTree, prevTree) {
       walkTree(node, position)
     }
     if (type === 'REMOVE_NODE') {
-      // position.removeChild(node)
+      position.removeChild(node)
     }
   })
   // diffResult.forEach(diffItem => {
@@ -38,16 +38,18 @@ export function walkObj (prevs, curs) {
           position: target
         })
       } else if (cursChild[i] === undefined) {
-        // console.log(prevChild)
-        // var rtargetId = prevChild[i].uuid
-        // var rtarget = document.querySelectorAll(`[wz-id="${rtargetId}"]`)[0].parentNode
-        // // remove item
-        // console.log(rtargetId)
-        // diffResult.push({
-        //   type: 'REMOVE_NODE',
-        //   position: rtarget,
-        //   node: document.querySelectorAll(`[wz-id="${rtargetId}"]`)[0]
-        // })
+        // remove child
+        const prevKey = prevChild.map(item => item.key)
+        const cursKey = cursChild.map(item => item.key)
+        const diffKey = getDiffKey(prevKey, cursKey)
+        diffKey.forEach(k => {
+          var res = prevChild.find(c => c.key === k)
+          diffResult.push({
+            type: 'REMOVE_NODE',
+            node: document.querySelectorAll(`[wz-id="${res.uuid}"]`)[0],
+            position: document.querySelectorAll(`[wz-id="${prevChild[i].uuid}"]`)[0].parentNode
+          })
+        })
       } else {
         // compare every item
         walkObj(prevChild[i], cursChild[i])
@@ -79,10 +81,13 @@ export function walkObj (prevs, curs) {
   // })
 }
 
-function compare (one, two) {
-  if (one.type !== two.type) {
-    // 1
-  } else {
-    //
-  }
+function getDiffKey (one, two) {
+  const result = []
+  const loneOne = one.length > two.length ? one : two
+  loneOne.forEach(item => {
+    if (!one.includes(item) || !two.includes(item)) {
+      result.push(item)
+    }
+  })
+  return result
 }

@@ -24,6 +24,7 @@ export function makeElement () {
       Object.entries(arguments[1]).map(item => {
         if (item[0] === 'key') {
           resetProps.key = item[1]
+          window.temp.push(item[1])
         }
         // props attr
         if (!originAttr.includes(item[0]) && item[0] !== 'key') {
@@ -67,6 +68,9 @@ export function makeElement () {
         if (Array.isArray(item)) {
           window.tree.child = item
         } else {
+          if (window.temp.length > 0) {
+            window.tree.key = window.temp.pop()
+          }
           window.tree.child.push(item)
         }
       }
