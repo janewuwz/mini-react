@@ -1,45 +1,30 @@
 
-export function realRender (tree) {
-  Object.keys(tree).forEach((item, index) => {
-    const value = tree[item]
-    if (value.type === undefined) {
-      return
-    }
-    const ele = document.createElement(value.type)
-    let ParentDom
-    if (value.parent) {
-      ParentDom = document.querySelectorAll(`[data-id="${value.parent}"]`)
-    } else {
-      ParentDom = document.getElementById('root')
-    }
-    if (value && value.attr && value.attr.length > 0) {
-      value.attr.forEach(val => {
-        const k = Object.keys(val)[0]
-        const v = val[k]
+import * as uid from 'node-uuid'
 
-        if (typeof v === 'function') {
-          ele[k] = v
-        } else {
-          ele.setAttribute(k, val[k])
-        }
-      })
-    }
-    if (value.txt !== undefined) {
-      const txtNode = document.createTextNode(value.txt)
-      ele.appendChild(txtNode)
-    }
-    if (ParentDom.length === undefined) {
-      ParentDom.appendChild(ele)
-    } else {
-      for (var vv of ParentDom) {
-        vv.appendChild(ele)
-      }
-    }
-    ele.setAttribute('data-id', item)
-    if (value && value.child && value.child.length > 0) {
-      value.child.forEach((sub, count) => {
-        realRender(sub)
-      })
-    }
-  })
+export function realRender (tree) {
+  console.log(tree)
+  const root = document.getElementById('root')
+  walkTree(tree, root)
+}
+
+export function walkTree (element, parent) {
+  var dom = document.createElement(element.type)
+  const uuid = uid.v4()
+  dom.setAttribute('wz-id', uuid)
+  element.uuid = uuid
+  if (element.attr.length > 0) {
+    element.attr.forEach(at => {
+      var key = Object.keys(at)[0]
+      dom[key] = at[key]
+    })
+  }
+  parent.appendChild(dom)
+  if (element.txt && element.txt !== '') {
+    dom.appendChild(document.createTextNode(element.txt))
+  }
+  if (element.child.length > 0) {
+    element.child.forEach(item => {
+      walkTree(item, dom)
+    })
+  }
 }

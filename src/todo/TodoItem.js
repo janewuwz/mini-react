@@ -2,8 +2,9 @@ import {Component, makeElement} from '../wz'
 
 export default class TodoItem extends Component {
   handleRemoveButtonClick = () => {
-    const { onTodoItemRemoved, id } = this.props;
-    onTodoItemRemoved(id);    
+    const { onTodoItemRemoved, todo } = this.props;
+    // console.log(todo)
+    onTodoItemRemoved(todo.id);    
   }
   handleTodoTitleClick = () => {
     const { onTodoItemToggled, id } = this.props;
@@ -17,8 +18,8 @@ export default class TodoItem extends Component {
      * </div>
      */
     const {count} = this.state
-    const {title, complete} = this.props
+    const {title, complete} = this.props.todo
 
-    return makeElement('div', {}, makeElement('div', {onclick: this.handleTodoTitleClick}, this.state.title), makeElement('div', {onclick: this.handleRemoveButtonClick}, 'x'))
+    return makeElement('div', {}, makeElement('div', {onclick: this.handleTodoTitleClick}, title), makeElement('div', {onclick: this.handleRemoveButtonClick}, 'x'))
   }
 }

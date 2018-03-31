@@ -1,4 +1,4 @@
-import {Component, makeElement} from './wz'
+import {Component, makeElement} from '../wz'
 import TodoList from './TodoList'
 import TodoInput from './TodoInput'
 
@@ -11,29 +11,31 @@ export default class TodoApp extends Component {
           id: new Date().getTime(),
           title: 'My Todo',
           complete: false
+        },
+        {
+          id: new Date().getTime() + 1000,
+          title: 'My Todo2',
+          complete: false
         }
       ]
     }
   }
   handleTodoItemAdded = title => {
-    this.setState(prevState => {
-      return {
-        todos: prevState.todos.concat([{
+
+    this.setState({
+      todos: this.state.todos.concat([
+        {
           id: new Date().getTime(),
           title,
           complete: false
-        }])
-      }
+        }
+      ])
     })
   }
 
   handleTodoItemRemoved = id => {
-    this.setState(prevState => {
-      return {
-        todos: prevState.todos.filter(item => {
-          return item.id !== id
-        })
-      }
+    this.setState({
+      todos: this.state.todos.filter(item => item.id !== id)
     })
   }
 

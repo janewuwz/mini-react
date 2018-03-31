@@ -1,6 +1,6 @@
-import {Component, makeElement} from './wz'
+import {Component, makeElement} from '../wz'
 
-class TodoInput extends Component {
+export default class TodoInput extends Component {
   handleKeyPress = (e) => {
     const key = e.key;
     const value = e.target.value;
@@ -14,8 +14,6 @@ class TodoInput extends Component {
      * <input type="text" onKeyPress={this.handleKeyPress} />
      */
     const {count} = this.state
-    const {title, complete} = this.props
-
-    return makeElement('input', {type: 'text'}, '')
+    return makeElement('input', {type: 'text', onkeypress: this.handleKeyPress}, '')
   }
 }

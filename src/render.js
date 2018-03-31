@@ -10,21 +10,30 @@ export function render (component, Node, resetProps) {
 
   if (component === undefined) {
     // child component
-    if (child === undefined) {
-      child = new Node()
-      if (resetProps) {
-        child.props = {...resetProps}
-      }
-      child.ComponentWillMount()
-      child.render()
-      child.ComponentDidMount()
-    } else {
-      child.ComponentWillUpdate()
-      child.render()
-      child.ComponentDidUpdate()
+    child = new Node()
+    if (resetProps) {
+      const {key, ...other} = resetProps
+      child.props = other
+      child.key = key
     }
+    child.ComponentWillMount()
+    let aa = child.render()
+    child.ComponentDidMount()
+    // if (child === undefined) {
+    //   child = new Node()
+    //   if (resetProps) {
+    //     child.props = {...resetProps}
+    //   }
+    //   child.ComponentWillMount()
+    //   child.render()
+    //   child.ComponentDidMount()
+    // } else {
+    //   child.ComponentWillUpdate()
+    //   child.render()
+    //   child.ComponentDidUpdate()
+    // }
 
-    return
+    return aa
   }
   if (typeof Node === 'function') {
     // init mount
@@ -38,7 +47,6 @@ export function render (component, Node, resetProps) {
     node.ComponentWillUpdate()
     window.prevTree = _.cloneDeep(window.tree)
     window.tree = {}
-    window.temp = []
     resu = node.render()
     diff(window.tree, window.prevTree)
     node.ComponentDidUpdate()
