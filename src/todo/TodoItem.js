@@ -7,8 +7,8 @@ export default class TodoItem extends Component {
     onTodoItemRemoved(todo.id);    
   }
   handleTodoTitleClick = () => {
-    const { onTodoItemToggled, id } = this.props;
-    onTodoItemToggled(id);
+    const { onTodoItemToggled, todo } = this.props;
+    onTodoItemToggled(todo.id);
   }
   render () {
     /**
@@ -19,7 +19,7 @@ export default class TodoItem extends Component {
      */
     const {count} = this.state
     const {title, complete} = this.props.todo
-
-    return makeElement('div', {}, makeElement('div', {onclick: this.handleTodoTitleClick}, title), makeElement('div', {onclick: this.handleRemoveButtonClick}, 'x'))
+    var isComplete = complete ? 'complete' : 'title'
+    return makeElement('div', {className: 'item'}, makeElement('div', {onclick: this.handleTodoTitleClick, className: isComplete}, title), makeElement('span', {onclick: this.handleRemoveButtonClick, className: 'remove'}, 'x'))
   }
 }

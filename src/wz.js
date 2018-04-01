@@ -14,7 +14,7 @@ import {render} from './render'
 window.tree = {}
 window.temp = []
 export function makeElement () {
-  const originAttr = ['name', 'id', 'type', 'onkeypress', 'key', 'onclick']
+  const originAttr = ['name', 'id', 'type', 'onkeypress', 'key', 'onclick', 'className', 'placeholder']
   if (typeof arguments[0] === 'function') {
     const resetProps = {}
     // child component
@@ -101,7 +101,6 @@ export class Component {
       //   render(document.getElementById('root'), this)
       // })
       this.state = {
-        ...this.state,
         ...newState
       }
       render(document.getElementById('root'), this)

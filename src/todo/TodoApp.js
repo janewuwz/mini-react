@@ -25,7 +25,7 @@ export default class TodoApp extends Component {
     this.setState({
       todos: this.state.todos.concat([
         {
-          id: new Date().getTime(),
+          id: new Date().getTime() + Math.ceil(Math.random() * 1000),
           title,
           complete: false
         }
@@ -40,14 +40,8 @@ export default class TodoApp extends Component {
   }
 
   handleTodoItemToggled = id => {
-    this.setState(prevState => {
-      return {
-        todos: prevState.todos.map(item => (
-          item.id === id
-            ? { ...item, complete: !item.complete }
-            : item
-        ))
-      }
+    this.setState({
+      todos: this.state.todos.map(item => item.id === id ? {...item, complete: !item.complete} : item)
     })
   }
 
@@ -63,6 +57,6 @@ export default class TodoApp extends Component {
       </div>
      */
     const { todos } = this.state;
-    return makeElement('div', {}, makeElement(TodoInput, {'onTodoItemAdded': this.handleTodoItemAdded}, ''), makeElement(TodoList, {'todos': todos, 'onTodoItemToggled': this.handleTodoItemToggled, 'onTodoItemRemoved': this.handleTodoItemRemoved}, ''))
+    return makeElement('div', {className: 'wrapper'}, makeElement(TodoInput, {'onTodoItemAdded': this.handleTodoItemAdded}, ''), makeElement(TodoList, {'todos': todos, 'onTodoItemToggled': this.handleTodoItemToggled, 'onTodoItemRemoved': this.handleTodoItemRemoved}, ''))
   }
 }

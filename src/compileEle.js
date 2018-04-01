@@ -2,7 +2,6 @@
 import * as uid from 'node-uuid'
 
 export function realRender (tree) {
-  console.log(tree)
   const root = document.getElementById('root')
   walkTree(tree, root)
 }

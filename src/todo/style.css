@@ -1,0 +1,44 @@
+.input {
+  width: 200px;
+  height: 30px;
+  border: none;
+  border-bottom: 2px solid lightsalmon;
+  padding: 0 10px;
+  line-height: 30px;
+  font-size: 16px;
+  background: #EAF5DB;
+}
+
+.item {
+  width: 70%;
+  height: 40px;
+  box-sizing: border-box;
+  line-height: 40px;
+  overflow: hidden;
+  padding: 0 30px;  
+}
+
+.title {
+  float: left;
+  color: #468c07;
+}
+
+.complete {
+  float: left;
+  color: #468c07;
+  text-decoration: line-through;
+}
+.remove {
+  float: right;
+  margin-right: 50%;
+  color: #717172;
+}
+
+.wrapper {
+  width: 80%;
+    margin: 0 auto;
+    text-align: center;
+    /* background: lightpink; */
+    box-shadow: 3px 2px 5px lightcoral;
+    background: local;
+}
