@@ -57,6 +57,6 @@ export default class TodoApp extends Component {
       </div>
      */
     const { todos } = this.state;
-    return makeElement('div', {className: 'wrapper'}, makeElement(TodoInput, {'onTodoItemAdded': this.handleTodoItemAdded}, ''), makeElement(TodoList, {'todos': todos, 'onTodoItemToggled': this.handleTodoItemToggled, 'onTodoItemRemoved': this.handleTodoItemRemoved}, ''))
+    return makeElement('div', {className: 'wrapper'}, makeElement('h2', {className: 'app'}, 'Todo App'), makeElement(TodoInput, {'onTodoItemAdded': this.handleTodoItemAdded}, ''), makeElement(TodoList, {'todos': todos, 'onTodoItemToggled': this.handleTodoItemToggled, 'onTodoItemRemoved': this.handleTodoItemRemoved}, ''))
   }
 }
