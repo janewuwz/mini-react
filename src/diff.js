@@ -6,7 +6,7 @@ let diffResult = []
 export default function diff (curTree, prevTree) {
   diffResult = []
   walkObj('root', prevTree, curTree)
-  var gg = _.cloneDeep(curTree)
+  var gg = _.cloneDeep(curTree) // next new
   diffResult.forEach(diffItem => {
     const {type, node, position} = diffItem
     if (type === 'ADD_NODE') {
@@ -18,7 +18,17 @@ export default function diff (curTree, prevTree) {
       // window.tree = window.prevTree
     }
   })
-  sort(gg, window.prevTree)
+  // sort('', gg, window.prevTree)
+  // console.log(mmm)
+  // mmm.forEach(l => {
+  //   const {moveNode, targetNode} = l
+  //   if (moveNode.nextSibling === targetNode) return
+  //   moveNode.parentNode.insertBefore(moveNode, targetNode)
+  //   // if (l.bad) {
+  //   //   moveNode.parentNode.appendChild(moveNode)
+  //   // }
+  // })
+  // mmm = []
   if (diffResult.length === 0) {
     // window.tree = window.prevTree
   }
@@ -38,7 +48,7 @@ export function walkObj (root, prevs, curs) {
     // const cursKey = cursChild.map(item => item.key)
     const diffKey = test(prevs.uuid, prevChild, cursChild)
     while (diffKey.add.length > 0) {
-      var adds = diffKey.add.pop()
+      var adds = diffKey.add.shift()
       const {parent, node} = adds
       diffResult.push({
         type: 'ADD_NODE',
@@ -68,8 +78,6 @@ export function walkObj (root, prevs, curs) {
     //   })
     //   prevs.child = _.cloneDeep(cursChild)
     // }
-    console.log(prevChild)
-    console.log(cursChild)
     for (var i = 0; i < loneOne; i++) {
       const prevKey = prevChild.map(item => item.key)
       const cursKey = cursChild.map(item => item.key)
@@ -187,13 +195,32 @@ function getDiffKey (one, two) {
   return result
 }
 
-function sort (one, two) {
-  console.log(one)
-  console.log(two)
-  if (one.child && one.child.length > 0) {
-    one.child.forEach((i, n) => {
-      sort(i, two[n])
-    })
+// var mmm = [] move node .....
+function sort (m, one, two, index, n) {
+  if (one.key) {
+    if (two.key === one.key) {
+      return
+    }
+    var moveId = m.find(item => item.key === one.key).uuid
+    var moveNode = document.querySelectorAll(`[wz-id="${moveId}"]`)[0]
+    if (n[index + 1]) {
+      var position = n[index + 1].key
+      var target = m.find(item => item.key === position).uuid
+      var f = m.map(k => k.uuid).indexOf(target)
+      var targetNode = document.querySelectorAll(`[wz-id="${target}"]`)[0]
+      moveNode.parentNode.insertBefore(moveNode, targetNode)
+      // 去掉已经移动的obj
+      m[f] = undefined
+      sort(m, one, two, index, n)
+      // mmm.push({moveNode, targetNode})
+    } else {
+      // mmm.push({bad: true, moveNode})
+    }
+  }
+  if (one.child.length > 0) {
+    for (var i = 0; i < one.child.length; i++) {
+      sort(two.child, one.child[i], two.child[i], i, one.child)
+    }
   }
 }
 
