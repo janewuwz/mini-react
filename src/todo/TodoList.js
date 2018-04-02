@@ -14,7 +14,7 @@ export default class TodoList extends Component {
               onTodoItemToggled={onTodoItemToggled}
               {...todo} />
             ))
-          : '할 일이 없습니다.'
+          : null
         }
      * </div>
      */

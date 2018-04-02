@@ -27,6 +27,7 @@
   overflow: hidden;
   padding: 0 50px; 
   margin: 0 auto; 
+  border-bottom: 1px solid #6DABF5;
 }
 
 .title {
@@ -55,6 +56,20 @@
   padding-bottom: 30px;
   background: #AFCFFB;
   box-shadow: 3px 5px 10px #6DABF5;
+}
+
+.filter {
+  display: inline-block;
+  margin: 0 20px;
+  color: #6DABF5;
+  border-bottom: 1px solid;
+  cursor: pointer;
+}
+
+.filter-wrapper {
+  width: 50%;
+  margin: 0 auto;
+  padding-top: 20px;
 }
 
 

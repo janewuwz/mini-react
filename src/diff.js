@@ -5,66 +5,138 @@ let diffResult = []
 
 export default function diff (curTree, prevTree) {
   diffResult = []
-  walkObj(prevTree, curTree)
+  walkObj('root', prevTree, curTree)
+  var gg = _.cloneDeep(curTree)
   diffResult.forEach(diffItem => {
     const {type, node, position} = diffItem
     if (type === 'ADD_NODE') {
       walkTree(node, position)
-      window.tree = window.prevTree
+      // window.tree = window.prevTree
     }
     if (type === 'REMOVE_NODE') {
       position.removeChild(node)
-      window.tree = window.prevTree
+      // window.tree = window.prevTree
     }
   })
-  // diffResult.forEach(diffItem => {
-  //   var targetDom = document.querySelectorAll(`[data-id="${diffItem.position}"]`)
-
-  // })
+  sort(gg, window.prevTree)
+  if (diffResult.length === 0) {
+    // window.tree = window.prevTree
+  }
+  window.tree = window.prevTree
 }
 
-export function walkObj (prevs, curs) {
+export function walkObj (root, prevs, curs) {
+  if (prevs === undefined || curs === undefined) {
+    return
+  }
   if (prevs.type === curs.type) {
     // compare child
-    let prevC = prevs.child
-    let cursC = curs.child
-    const loneOne = Math.max(prevC.length, cursC.length)
+    let prevChild = prevs.child
+    let cursChild = curs.child
+    const loneOne = Math.max(prevChild.length, cursChild.length)
+    // const prevKey = prevChild.map(item => item.key)
+    // const cursKey = cursChild.map(item => item.key)
+    const diffKey = test(prevs.uuid, prevChild, cursChild)
+    while (diffKey.add.length > 0) {
+      var adds = diffKey.add.pop()
+      const {parent, node} = adds
+      diffResult.push({
+        type: 'ADD_NODE',
+        position: document.querySelectorAll(`[wz-id="${parent}"]`)[0],
+        node: node
+      })
+      prevChild.push(node)
+    }
+    while (diffKey.remove.length > 0) {
+      var removes = diffKey.remove.pop()
+      const {parent, node} = removes
+      diffResult.push({
+        type: 'REMOVE_NODE',
+        position: document.querySelectorAll(`[wz-id="${parent}"]`)[0],
+        node: document.querySelectorAll(`[wz-id="${node.uuid}"]`)[0]
+      })
+      prevs.child = prevs.child.filter(p => p.key !== node.key)
+    }
+    // while (diffKey.move.length > 0) {
+    //   var moves = diffKey.move.pop()
+    //   const {parent, node, move} = moves
+    //   diffResult.push({
+    //     type: 'MOVE_NODE',
+    //     position: document.querySelectorAll(`[wz-id="${parent}"]`)[0],
+    //     node: document.querySelectorAll(`[wz-id="${node.uuid}"]`)[0],
+    //     move
+    //   })
+    //   prevs.child = _.cloneDeep(cursChild)
+    // }
+    console.log(prevChild)
+    console.log(cursChild)
     for (var i = 0; i < loneOne; i++) {
-      let prevChild = prevs.child
-      let cursChild = curs.child
+      const prevKey = prevChild.map(item => item.key)
+      const cursKey = cursChild.map(item => item.key)
+      // if (cursChild[i] !== undefined && prevChild[i] !== undefined && !Array.isArray(cursChild[i]) && !Array.isArray(prevChild[i])) {
+      //   if (prevChild[i].key !== cursChild[i].key) {
+
+      //   }
+      // }
       if (prevChild[i] === undefined) {
-        var targetId = prevChild[i - 1].uuid
-        var target = document.querySelectorAll(`[wz-id="${targetId}"]`)[0].parentNode
         // add item
-        diffResult.push({
-          type: 'ADD_NODE',
-          node: cursChild[i],
-          position: target
-        })
-        prevChild.push(cursChild[i])
+        const diffKey = getDiffKey(prevKey, cursKey)
+        if (diffKey.length > 1) {
+          // empty child
+          diffKey.forEach((p, i) => {
+            var res = cursChild.find(c => c.key === p)
+            diffResult.push({
+              type: 'ADD_NODE',
+              position: document.querySelectorAll(`[wz-id="${prevs.uuid}"]`)[0],
+              node: res
+            })
+          })
+          prevs.child = [...cursChild]
+          return
+        }
+        // batch add item
+        // var targetId = prevChild[i - 1].uuid // bug
+        // var target = document.querySelectorAll(`[wz-id="${targetId}"]`)[0].parentNode
+
+        // diffResult.push({
+        //   type: 'ADD_NODE',
+        //   node: cursChild[i],
+        //   position: target
+        // })
+        // prevChild.push(cursChild[i])
       } else if (cursChild[i] === undefined) {
         // remove child
-        let prevChild = prevs.child
-        let cursChild = curs.child
-        const prevKey = prevChild.map(item => item.key)
-        const cursKey = cursChild.map(item => item.key)
-        const diffKey = getDiffKey(prevKey, cursKey)
-        diffKey.forEach(k => {
-          var res = prevChild.find(c => c.key === k)
-          var del
-          prevChild.forEach((p, i) => {
-            if (p.key === k) del = i
+        // const diffKey = getDiffKey(prevKey, cursKey)
+        if (diffKey.length > 1) {
+          // batch remove nodes
+          diffKey.forEach((p, i) => {
+            var res = prevChild.find(c => c.key === p)
+            diffResult.push({
+              type: 'REMOVE_NODE',
+              node: document.querySelectorAll(`[wz-id="${res.uuid}"]`)[0],
+              position: document.querySelectorAll(`[wz-id="${prevChild[i].uuid}"]`)[0].parentNode,
+              isReplace: true
+            })
           })
-          diffResult.push({
-            type: 'REMOVE_NODE',
-            node: document.querySelectorAll(`[wz-id="${res.uuid}"]`)[0],
-            position: document.querySelectorAll(`[wz-id="${prevChild[i].uuid}"]`)[0].parentNode
-          })
-          prevChild.splice(del, 1)
-        })
+          prevs.child = [...cursChild] // ??????
+          return
+        }
+        // diffKey.forEach(k => {
+        //   var res = prevChild.find(c => c.key === k)
+        //   var del
+        //   prevChild.forEach((p, i) => {
+        //     if (p.key === k) del = i
+        //   })
+        //   diffResult.push({
+        //     type: 'REMOVE_NODE',
+        //     node: document.querySelectorAll(`[wz-id="${res.uuid}"]`)[0],
+        //     position: document.querySelectorAll(`[wz-id="${prevChild[i].uuid}"]`)[0].parentNode
+        //   })
+        //   prevChild.splice(del, 1)
+        // })
       } else {
         // compare every item
-        walkObj(prevChild[i], cursChild[i])
+        walkObj('', prevChild[i], cursChild[i])
       }
     }
 
@@ -83,9 +155,14 @@ export function walkObj (prevs, curs) {
         // modify attr | add attr
         pname[name] = cname[name]
         const n = name === 'className' ? 'class' : name
-        document.querySelectorAll(`[wz-id="${prevs.uuid}"]`)[0].setAttribute(n, cname[name])
-        window.tree = window.prevTree
+
+        try {
+          document.querySelectorAll(`[wz-id="${prevs.uuid}"]`)[0].setAttribute(n, cname[name])
+        } catch (error) {
+
+        }
       }
+      window.tree = window.prevTree
       if (cname === undefined) {
         // remove attr
         // delete prevAttr[name]
@@ -97,27 +174,6 @@ export function walkObj (prevs, curs) {
     // 彻底替换，重新渲染
 
   }
-  // const cur = Object.values(curs)[0]
-  // const preRootKey = Object.keys(prevs)[0]
-  // const prev = Object.values(prevs)[0]
-  // Object.keys(cur).map(item => {
-  //   if (item === 'child') {
-  //     prev.child.forEach((element, ind) => {
-  //       walkObj(element, cur.child[ind])
-  //     })
-  //   }
-
-  //   if (item === 'txt') {
-  //     if (cur.txt !== prev.txt) {
-  //       window.tree = window.prevTree
-  //       prev.txt = cur.txt
-  //       const tar = document.querySelectorAll(`[data-id="${preRootKey}"]`)
-  //       for (var vv of tar) {
-  //         vv.childNodes[0].nodeValue = prev.txt
-  //       }
-  //     }
-  //   }
-  // })
 }
 
 function getDiffKey (one, two) {
@@ -126,6 +182,54 @@ function getDiffKey (one, two) {
   loneOne.forEach(item => {
     if (!one.includes(item) || !two.includes(item)) {
       result.push(item)
+    }
+  })
+  return result
+}
+
+function sort (one, two) {
+  console.log(one)
+  console.log(two)
+  if (one.child && one.child.length > 0) {
+    one.child.forEach((i, n) => {
+      sort(i, two[n])
+    })
+  }
+}
+
+function test (parentId, one, two) {
+  const result = {add: [], remove: [], move: []}
+  const loneOne = one.length > two.length ? one : two
+  loneOne.forEach((item, index) => {
+    if (item.key) {
+      var a = one.find(w => w.key === item.key)
+      var b = two.find(w => w.key === item.key)
+
+      // add key
+      if (a === undefined) {
+        result.add.push({parent: parentId, node: b})
+        return
+      }
+      // remove key
+      if (b === undefined) {
+        result.remove.push({parent: parentId, node: a})
+        return
+      }
+      // change key
+      if (a !== undefined && b !== undefined) {
+        // var q = one.map(l => l.key).indexOf(item.key)
+        // var d = two.map(l => l.key).indexOf(item.key)
+        // if (q !== d) {
+        //   // move node
+        //   console.log(a)
+        //   console.log(b)
+        //   var move = d
+        //   result.move.push({parent: parentId, node: a, move})
+        // }
+        if (a.child.length > 0 && b.child.length > 0) {
+          walkObj(parentId, a, b)
+        }
+      }
     }
   })
   return result

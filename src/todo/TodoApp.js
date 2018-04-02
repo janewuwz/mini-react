@@ -1,11 +1,13 @@
 import {Component, makeElement} from '../wz'
 import TodoList from './TodoList'
 import TodoInput from './TodoInput'
+import TodoFilter from './TodoFilter'
 
 export default class TodoApp extends Component {
   constructor() {
     super()
     this.state = {
+      show: 'all',
       todos: [
         {
           id: new Date().getTime(),
@@ -45,6 +47,10 @@ export default class TodoApp extends Component {
     })
   }
 
+  handleFilter = (type) => {
+    this.setState({todos: this.state.todos, show: type})
+  }
+
 
   render () {
     /**
@@ -56,7 +62,15 @@ export default class TodoApp extends Component {
           onTodoItemRemoved={this.handleTodoItemRemoved} />
       </div>
      */
-    const { todos } = this.state;
-    return makeElement('div', {className: 'wrapper'}, makeElement('h2', {className: 'app'}, 'Todo App'), makeElement(TodoInput, {'onTodoItemAdded': this.handleTodoItemAdded}, ''), makeElement(TodoList, {'todos': todos, 'onTodoItemToggled': this.handleTodoItemToggled, 'onTodoItemRemoved': this.handleTodoItemRemoved}, ''))
+    const { todos, show } = this.state;
+    let showTodos
+    if (show === 'Completed') {
+      showTodos = todos.filter(todo => todo.complete)
+    } else if (show === 'Active') {
+      showTodos = todos.filter(todo => !todo.complete)
+    } else {
+      showTodos = todos
+    }
+    return makeElement('div', {className: 'wrapper'}, makeElement('h2', {className: 'app'}, 'Todo App'), makeElement(TodoInput, {'onTodoItemAdded': this.handleTodoItemAdded}, ''), makeElement(TodoList, {todos: showTodos, 'onTodoItemToggled': this.handleTodoItemToggled, 'onTodoItemRemoved': this.handleTodoItemRemoved}, ''), makeElement(TodoFilter, {getFilter: this.handleFilter}, ''))
   }
 }

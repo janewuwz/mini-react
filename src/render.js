@@ -1,4 +1,4 @@
-import {realRender} from './compileEle'
+import {realRender, walkTree} from './compileEle'
 import * as _ from 'lodash'
 import diff from './diff'
 

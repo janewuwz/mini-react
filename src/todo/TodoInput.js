@@ -15,6 +15,6 @@ export default class TodoInput extends Component {
      * <input type="text" onKeyPress={this.handleKeyPress} />
      */
     const {count} = this.state
-    return makeElement('input', {type: 'text', onkeypress: this.handleKeyPress, className: 'input', placeholder: 'Please input todo...'}, '')
+    return makeElement('input', {type: 'text', onkeypress: this.handleKeyPress, className: 'input', placeholder: 'What need to do?'}, '')
   }
 }
