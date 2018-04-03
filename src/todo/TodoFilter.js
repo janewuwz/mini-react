@@ -6,7 +6,7 @@ export default class TodoFilter extends Component {
     getFilter(type)
   }
   render () {
-    
-    return makeElement('div', {className: 'filter-wrapper'}, makeElement('div', {className: 'filter', onclick: this.getTodo('Completed')}, 'Completed'), makeElement('div', {className: 'filter', onclick: this.getTodo('Active')}, 'Active'), makeElement('div', {className: 'filter', onclick: this.getTodo('All')}, 'All'))
+    const {show} = this.props
+    return makeElement('div', {className: 'filter-wrapper'}, makeElement('div', {className: 'filter', onclick: this.getTodo('completed')}, 'completed'), makeElement('div', {className: 'filter', onclick: this.getTodo('active')}, 'active'), makeElement('div', {className: 'filter', onclick: this.getTodo('All')}, 'all'))
   }
 }

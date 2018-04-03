@@ -77,7 +77,6 @@ export function makeElement () {
     })
     return window.tree
   }
-  console.log(window.tree)
   return window.tree
 }
 

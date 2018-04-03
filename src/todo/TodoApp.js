@@ -64,13 +64,13 @@ export default class TodoApp extends Component {
      */
     const { todos, show } = this.state;
     let showTodos
-    if (show === 'Completed') {
+    if (show === 'completed') {
       showTodos = todos.filter(todo => todo.complete)
-    } else if (show === 'Active') {
+    } else if (show === 'active') {
       showTodos = todos.filter(todo => !todo.complete)
     } else {
       showTodos = todos
     }
-    return makeElement('div', {className: 'wrapper'}, makeElement('h2', {className: 'app'}, 'Todo App'), makeElement(TodoInput, {'onTodoItemAdded': this.handleTodoItemAdded}, ''), makeElement(TodoList, {todos: showTodos, 'onTodoItemToggled': this.handleTodoItemToggled, 'onTodoItemRemoved': this.handleTodoItemRemoved}, ''), makeElement(TodoFilter, {getFilter: this.handleFilter}, ''))
+    return makeElement('div', {className: 'wrapper'}, makeElement('h2', {className: 'app'}, 'Todo App'), makeElement(TodoInput, {'onTodoItemAdded': this.handleTodoItemAdded}, ''), makeElement(TodoList, {todos: showTodos, 'onTodoItemToggled': this.handleTodoItemToggled, 'onTodoItemRemoved': this.handleTodoItemRemoved}, ''), makeElement(TodoFilter, {getFilter: this.handleFilter, show}, ''))
   }
 }
