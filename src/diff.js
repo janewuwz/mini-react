@@ -12,11 +12,11 @@ export default function diff (curTree, prevTree) {
     const {type, node, position} = diffItem
     if (type === 'ADD_NODE') {
       walkTree(node, position)
-      // window.tree = window.prevTree
+      window.tree = window.prevTree
     }
     if (type === 'REMOVE_NODE') {
       position.removeChild(node)
-      // window.tree = window.prevTree
+      window.tree = window.prevTree
     }
     if (type === 'MODIFY') {
       document.querySelectorAll(`[wz-id="${diffItem.node}"]`)[0].setAttribute('class', diffItem.content.className)
@@ -208,10 +208,11 @@ function sort (m, one, two, index, n) {
   }
 }
 
+// one: prev   two: cur
 function test (parentId, one, two) {
   const result = {add: [], remove: [], move: []}
-  const loneOne = one.length > two.length ? one : two
-  loneOne.forEach((item, index) => {
+
+  two.forEach((item, index) => {
     if (item.key) {
       var a = one.find(w => w.key === item.key)
       var b = two.find(w => w.key === item.key)
@@ -219,12 +220,6 @@ function test (parentId, one, two) {
       // add key
       if (a === undefined) {
         result.add.push({parent: parentId, node: b})
-        return
-      }
-      // remove key
-      if (b === undefined) {
-        result.remove.push({parent: parentId, node: a})
-        return
       }
       // change key
       if (a !== undefined && b !== undefined) {
@@ -236,6 +231,29 @@ function test (parentId, one, two) {
           walkObj(parentId, a, b)
         }
       }
+    } else {
+    }
+  })
+  one.forEach((item, index) => {
+    if (item.key) {
+      var a = one.find(w => w.key === item.key)
+      var b = two.find(w => w.key === item.key)
+
+      // remove key
+      if (b === undefined) {
+        result.remove.push({parent: parentId, node: a})
+      }
+      // change key
+      if (a !== undefined && b !== undefined) {
+        // change attr
+
+        if (a.child.length > 0 && b.child.length > 0) {
+          // diff child attr
+          diffAttr(a.child, b.child)
+          walkObj(parentId, a, b)
+        }
+      }
+    } else {
     }
   })
   return result
