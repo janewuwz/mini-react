@@ -1,5 +1,5 @@
-import {realRender, walkTree} from './compileEle'
-import * as _ from 'lodash'
+import {realRender} from './compileEle'
+import cloneDeep from './utils/cloneDeep'
 import diff from './diff'
 
 // export function
@@ -45,7 +45,7 @@ export function render (component, Node, resetProps) {
   } else {
     // update
     node.ComponentWillUpdate()
-    window.prevTree = _.cloneDeep(window.tree)
+    window.prevTree = cloneDeep(window.tree)
     window.tree = {}
     resu = node.render()
     diff(window.tree, window.prevTree)

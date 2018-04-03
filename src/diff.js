@@ -1,5 +1,5 @@
-import * as _ from 'lodash'
 import {walkTree} from './compileEle'
+import cloneDeep from './utils/cloneDeep'  // I know why to need expose
 
 let diffResult = []
 let mmm = []
@@ -7,7 +7,7 @@ export default function diff (curTree, prevTree) {
   diffResult = []
   mmm = []
   walkObj('root', prevTree, curTree)
-  var gg = _.cloneDeep(curTree) // next new
+  var gg = cloneDeep(curTree) // next new
   diffResult.forEach(diffItem => {
     const {type, node, position} = diffItem
     if (type === 'ADD_NODE') {
