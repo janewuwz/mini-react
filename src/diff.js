@@ -1,5 +1,6 @@
 import * as _ from 'lodash'
 import { walkTree} from './compileEle'
+import { Object } from 'core-js'
 
 let diffResult = []
 
@@ -16,6 +17,9 @@ export default function diff (curTree, prevTree) {
     if (type === 'REMOVE_NODE') {
       position.removeChild(node)
       // window.tree = window.prevTree
+    }
+    if (type === 'MODIFY') {
+      document.querySelectorAll(`[wz-id="${diffItem.node}"]`)[0].setAttribute('class', diffItem.content.className)
     }
   })
   // sort('', gg, window.prevTree)
@@ -67,17 +71,6 @@ export function walkObj (root, prevs, curs) {
       })
       prevs.child = prevs.child.filter(p => p.key !== node.key)
     }
-    // while (diffKey.move.length > 0) {
-    //   var moves = diffKey.move.pop()
-    //   const {parent, node, move} = moves
-    //   diffResult.push({
-    //     type: 'MOVE_NODE',
-    //     position: document.querySelectorAll(`[wz-id="${parent}"]`)[0],
-    //     node: document.querySelectorAll(`[wz-id="${node.uuid}"]`)[0],
-    //     move
-    //   })
-    //   prevs.child = _.cloneDeep(cursChild)
-    // }
     for (var i = 0; i < loneOne; i++) {
       const prevKey = prevChild.map(item => item.key)
       const cursKey = cursChild.map(item => item.key)
@@ -147,40 +140,31 @@ export function walkObj (root, prevs, curs) {
         walkObj('', prevChild[i], cursChild[i])
       }
     }
-
-    // compare attr
-    let prevAttr = prevs.attr
-    let curAttr = curs.attr
-    const loneAttr = prevAttr.length > prevAttr.length ? prevAttr : curAttr
-    loneAttr.map(item => Object.keys(item)[0]).forEach(name => {
-      const cname = curAttr.find(c => c[name])
-      const pname = prevAttr.find(p => p[name])
-      if (typeof cname[name] === 'function' || typeof pname[name] === 'function') {
-        // 过滤props
-        return
-      }
-      if (cname[name] !== pname[name] || pname === undefined) {
-        // modify attr | add attr
-        pname[name] = cname[name]
-        const n = name === 'className' ? 'class' : name
-
-        try {
-          document.querySelectorAll(`[wz-id="${prevs.uuid}"]`)[0].setAttribute(n, cname[name])
-        } catch (error) {
-
-        }
-      }
-      window.tree = window.prevTree
-      if (cname === undefined) {
-        // remove attr
-        // delete prevAttr[name]
-        // document.querySelectorAll(`[wz-id="${prevs.uuid}"]`)[0].removeAttribute(name)
-        // window.tree = window.prevTree
-      }
-    })
   } else {
     // 彻底替换，重新渲染
 
+  }
+}
+
+function diffAttr (one, two) {
+  // TODO txt
+  // attr
+  // two: after, one: before
+  var len = Math.max(one.length, two.length)
+  for (var i = 0; i < len; i++) {
+    for (var j = 0; j < two[i].attr.length; j++) {
+      if (two[i].attr[j].className !== one[i].attr[j].className) {
+        diffResult.push({
+          type: 'MODIFY',
+          node: one[i].uuid,
+          content: two[i].attr[j]
+        })
+        one[i].attr[j] = {...two[i].attr[j]}
+      }
+    }
+    if (one[i].child.length > 0) {
+      diffAttr(one.child, two.child)
+    }
   }
 }
 
@@ -244,16 +228,11 @@ function test (parentId, one, two) {
       }
       // change key
       if (a !== undefined && b !== undefined) {
-        // var q = one.map(l => l.key).indexOf(item.key)
-        // var d = two.map(l => l.key).indexOf(item.key)
-        // if (q !== d) {
-        //   // move node
-        //   console.log(a)
-        //   console.log(b)
-        //   var move = d
-        //   result.move.push({parent: parentId, node: a, move})
-        // }
+        // change attr
+
         if (a.child.length > 0 && b.child.length > 0) {
+          // diff child attr
+          diffAttr(a.child, b.child)
           walkObj(parentId, a, b)
         }
       }
