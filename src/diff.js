@@ -55,8 +55,6 @@ export function walkObj (root, prevs, curs) {
     let prevChild = prevs.child
     let cursChild = curs.child
     const loneOne = Math.max(prevChild.length, cursChild.length)
-    // const prevKey = prevChild.map(item => item.key)
-    // const cursKey = cursChild.map(item => item.key)
     const diffKey = diffByKey(prevs.uuid, prevChild, cursChild)
     while (diffKey.add.length > 0) {
       var adds = diffKey.add.shift()
@@ -195,7 +193,7 @@ function sortNode (parent, initial, accu, index, accuParent) {
           moveNode: moveObj,
           positionNode: accuChilds[positionIndex]
         })
-        // consistent with real dom
+        // consistent with real dom，simulate moving dom
         const removeIndex = getIndexOfArray(accuChilds, moveObj.key)
         delItem(accuChilds, removeIndex)
         const change = getIndexOfArray(accuChilds, lastOneKey) + 1
