@@ -1,12 +1,12 @@
-import {realRender, walkTree} from './compileEle'
-import * as _ from 'lodash'
+import {realRender} from './compileEle'
+import cloneDeep from './utils/cloneDeep'
 import diff from './diff'
 
 // export function
 let child
 export function render (component, Node, resetProps) {
   let node = Node
-  let resu
+  let afterRender
 
   if (component === undefined) {
     // child component
@@ -39,21 +39,20 @@ export function render (component, Node, resetProps) {
     // init mount
     node = new Node()
     node.ComponentWillMount()
-    resu = node.render()
+    afterRender = node.render()
     realRender(window.tree)
     node.ComponentDidMount()
   } else {
     // update
     node.ComponentWillUpdate()
-    window.prevTree = _.cloneDeep(window.tree)
+    window.prevTree = cloneDeep(window.tree)
     window.tree = {}
-    resu = node.render()
+    afterRender = node.render()
     diff(window.tree, window.prevTree)
     node.ComponentDidUpdate()
     node.ComponentWillUnMount()
   }
-  if (resu && typeof resu === 'Node') {
-    component.appendChild(resu)
+  if (afterRender && typeof afterRender === 'Node') {
+    component.appendChild(afterRender)
   }
-  // component.appendChild(resu)
 }

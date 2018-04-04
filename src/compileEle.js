@@ -1,5 +1,5 @@
 
-import * as uid from 'node-uuid'
+import * as nodeuuid from 'node-uuid'
 
 export function realRender (tree) {
   const root = document.getElementById('root')
@@ -8,7 +8,7 @@ export function realRender (tree) {
 
 export function walkTree (element, parent) {
   var dom = document.createElement(element.type)
-  const uuid = uid.v4()
+  const uuid = nodeuuid.v4()
   dom.setAttribute('wz-id', uuid)
   element.uuid = uuid
   if (element.attr.length > 0) {

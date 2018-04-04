@@ -1,13 +1,13 @@
-import * as _ from 'lodash'
 import {walkTree} from './compileEle'
+import cloneDeep from './utils/cloneDeep'  // I know why to need expose
 
 let diffResult = []
-let mmm = []
+let moveQueue = []
 export default function diff (curTree, prevTree) {
   diffResult = []
-  mmm = []
+  moveQueue = []
   walkObj('root', prevTree, curTree)
-  var gg = _.cloneDeep(curTree) // next new
+  var gg = cloneDeep(curTree) // next new
   diffResult.forEach(diffItem => {
     const {type, node, position} = diffItem
     if (type === 'ADD_NODE') {
@@ -18,24 +18,34 @@ export default function diff (curTree, prevTree) {
       position.removeChild(node)
       window.tree = window.prevTree
     }
-    if (type === 'MODIFY') {
+    if (type === 'MODIFY_NODE') {
       document.querySelectorAll(`[wz-id="${diffItem.node}"]`)[0].setAttribute('class', diffItem.content.className)
     }
   })
-  sort('', gg, window.prevTree)
-  mmm.forEach(m => {
+  sortNode('', gg, window.prevTree)
+  moveQueue.forEach(m => {
     const {moveNode, positionNode} = m
     var mn = document.querySelectorAll(`[wz-id="${moveNode.uuid}"]`)[0]
     var pn = document.querySelectorAll(`[wz-id="${positionNode.uuid}"]`)[0]
     mn.parentNode.insertBefore(mn, pn)
   })
-  mmm = []
+  moveQueue = []
   if (diffResult.length === 0) {
     // window.tree = window.prevTree
   }
   window.tree = window.prevTree
 }
 
+function findNodeByUuid (uuid) {
+  return document.querySelectorAll(`[wz-id="${uuid}"]`)[0]
+}
+
+/**
+ *
+ * @param {*} root
+ * @param {*} prevs
+ * @param {*} curs
+ */
 export function walkObj (root, prevs, curs) {
   if (prevs === undefined || curs === undefined) {
     return
@@ -47,7 +57,7 @@ export function walkObj (root, prevs, curs) {
     const loneOne = Math.max(prevChild.length, cursChild.length)
     // const prevKey = prevChild.map(item => item.key)
     // const cursKey = cursChild.map(item => item.key)
-    const diffKey = test(prevs.uuid, prevChild, cursChild)
+    const diffKey = diffByKey(prevs.uuid, prevChild, cursChild)
     while (diffKey.add.length > 0) {
       var adds = diffKey.add.shift()
       const {parent, node} = adds
@@ -73,7 +83,7 @@ export function walkObj (root, prevs, curs) {
       const cursKey = cursChild.map(item => item.key)
       if (prevChild[i] === undefined) {
         // add item
-        const diffKey = getDiffKey(prevKey, cursKey)
+        const diffKey = diffByKey(prevKey, cursKey)
         if (diffKey.length > 1) {
           // empty child
           diffKey.forEach((p, i) => {
@@ -115,72 +125,82 @@ export function walkObj (root, prevs, curs) {
   }
 }
 
-function diffAttr (one, two) {
+/**
+ *
+ * @param {array} prevArr
+ * @param {array} curArr
+ */
+function diffAttr (prevArr, curArr) {
   // TODO txt
-  // attr
-  // two: after, one: before
-  var len = Math.max(one.length, two.length)
+  // modify attr
+  var len = Math.max(prevArr.length, curArr.length)
   for (var i = 0; i < len; i++) {
-    for (var j = 0; j < two[i].attr.length; j++) {
-      if (two[i].attr[j].className !== one[i].attr[j].className) {
+    for (var j = 0; j < curArr[i].attr.length; j++) {
+      // only className
+      if (curArr[i].attr[j].className !== prevArr[i].attr[j].className) {
         diffResult.push({
-          type: 'MODIFY',
-          node: one[i].uuid,
-          content: two[i].attr[j]
+          type: 'MODIFY_NODE',
+          node: prevArr[i].uuid,
+          content: curArr[i].attr[j]
         })
-        one[i].attr[j] = {...two[i].attr[j]}
+        prevArr[i].attr[j] = {...curArr[i].attr[j]}
       }
     }
-    if (one[i].child.length > 0) {
-      diffAttr(one.child, two.child)
+    if (prevArr[i].child.length > 0) {
+      diffAttr(prevArr.child, curArr.child)
     }
   }
 }
 
-function getDiffKey (one, two) {
-  const result = []
-  const loneOne = one.length > two.length ? one : two
-  loneOne.forEach(item => {
-    if (!one.includes(item) || !two.includes(item)) {
-      result.push(item)
-    }
-  })
-  return result
-}
- // move node .....
-// one is standard
-function sort (m, one, two, index, n) {
-  if (one.key) {
-    if (one.key !== two.key) {
-      // move
-      const moveObj = n.child.find(item => item.key === one.key)
-      if (m.child[index + 1]) {
-        const positionObj = n.child.find(item => item.key === m.child[index + 1].key)
-        n = n.child.filter(v => v.key === moveObj.key)
-        n[index] = moveObj
-        mmm.push({
+/**
+ *
+ * @param {object} initial standard parent
+ * @param {object} ic standard child tree, It should have a key
+ * @param {object} ac reference child tree, It should have a key
+ * @param {number} index the traverse index
+ * @param {object} accu accumulator
+ */
+function sortNode (initial, ic, ac, index, accu) {
+  if (ic.key) {
+    // need move node
+    if (ic.key !== ac.key) {
+      // find moved obj from sorted
+      const moveObj = accu.child.find(item => item.key === ic.key)
+      if (initial.child[index + 1]) {
+        // find last obj before moved obj
+        const positionObj = accu.child.find(item => item.key === initial.child[index + 1].key)
+        // reduce current obj tree
+        accu = accu.child.filter(v => v.key === moveObj.key)  // remove
+        accu[index] = moveObj // insert
+        // add move target and position (both include uuid)
+        moveQueue.push({
           moveNode: moveObj,
           positionNode: positionObj
         })
-        // moveNode.parentNode.insertBefore(moveNode, positionNode)
       }
     }
   }
-  if (one.child.length > 0) {
-    for (var i = 0; i < one.child.length; i++) {
-      sort(one, one.child[i], two.child[i], i, two)
+  // recursive every child (if have)
+  if (ic.child.length > 0) {
+    for (var i = 0; i < ic.child.length; i++) {
+      sortNode(ic, ic.child[i], ac.child[i], i, ac)
     }
   }
 }
 
-// one: prev   two: cur
-function test (parentId, one, two) {
+/**
+ *
+ * @param {string} parentId
+ * @param {object} prevone
+ * @param {object} currentone
+ */
+function diffByKey (parentId, pre, cur) {
   const result = {add: [], remove: [], move: []}
-
-  two.forEach((item, index) => {
+  // based on current
+  cur.forEach((item, index) => {
     if (item.key) {
-      var a = one.find(w => w.key === item.key)
-      var b = two.find(w => w.key === item.key)
+      var a = pre.find(w => w.key === item.key)
+      var b = cur.find(w => w.key === item.key)
 
       // add key
       if (a === undefined) {
@@ -199,10 +219,11 @@ function test (parentId, one, two) {
     } else {
     }
   })
-  one.forEach((item, index) => {
+  // based on previous
+  pre.forEach((item, index) => {
     if (item.key) {
-      var a = one.find(w => w.key === item.key)
-      var b = two.find(w => w.key === item.key)
+      var a = pre.find(w => w.key === item.key)
+      var b = cur.find(w => w.key === item.key)
 
       // remove key
       if (b === undefined) {
