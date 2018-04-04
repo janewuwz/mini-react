@@ -7,7 +7,7 @@ export default function diff (curTree, prevTree) {
   diffResult = []
   moveQueue = []
   walkObj('root', prevTree, curTree)
-  var gg = cloneDeep(curTree) // next new
+  var initial = cloneDeep(curTree) // next new
   diffResult.forEach(diffItem => {
     const {type, node, position} = diffItem
     if (type === 'ADD_NODE') {
@@ -19,14 +19,14 @@ export default function diff (curTree, prevTree) {
       window.tree = window.prevTree
     }
     if (type === 'MODIFY_NODE') {
-      document.querySelectorAll(`[wz-id="${diffItem.node}"]`)[0].setAttribute('class', diffItem.content.className)
+      findNodeByUuid(diffItem.node).setAttribute('class', diffItem.content.className)
     }
   })
-  sortNode('', gg, window.prevTree)
+  sortNode('', initial, window.prevTree)
   moveQueue.forEach(m => {
     const {moveNode, positionNode} = m
-    var mn = document.querySelectorAll(`[wz-id="${moveNode.uuid}"]`)[0]
-    var pn = document.querySelectorAll(`[wz-id="${positionNode.uuid}"]`)[0]
+    var mn = findNodeByUuid(moveNode.uuid)
+    var pn = findNodeByUuid(positionNode.uuid)
     mn.parentNode.insertBefore(mn, pn)
   })
   moveQueue = []
@@ -63,7 +63,7 @@ export function walkObj (root, prevs, curs) {
       const {parent, node} = adds
       diffResult.push({
         type: 'ADD_NODE',
-        position: document.querySelectorAll(`[wz-id="${parent}"]`)[0],
+        position: findNodeByUuid(parent),
         node: node
       })
       prevChild.push(node)
@@ -73,8 +73,8 @@ export function walkObj (root, prevs, curs) {
       const {parent, node} = removes
       diffResult.push({
         type: 'REMOVE_NODE',
-        position: document.querySelectorAll(`[wz-id="${parent}"]`)[0],
-        node: document.querySelectorAll(`[wz-id="${node.uuid}"]`)[0]
+        position: findNodeByUuid(parent),
+        node: findNodeByUuid(node.uuid)
       })
       prevs.child = prevs.child.filter(p => p.key !== node.key)
     }
@@ -90,7 +90,7 @@ export function walkObj (root, prevs, curs) {
             var res = cursChild.find(c => c.key === p)
             diffResult.push({
               type: 'ADD_NODE',
-              position: document.querySelectorAll(`[wz-id="${prevs.uuid}"]`)[0],
+              position: findNodeByUuid(prevs.uuid),
               node: res
             })
           })
@@ -106,8 +106,8 @@ export function walkObj (root, prevs, curs) {
             var res = prevChild.find(c => c.key === p)
             diffResult.push({
               type: 'REMOVE_NODE',
-              node: document.querySelectorAll(`[wz-id="${res.uuid}"]`)[0],
-              position: document.querySelectorAll(`[wz-id="${prevChild[i].uuid}"]`)[0].parentNode,
+              node: findNodeByUuid(res.uuid),
+              position: findNodeByUuid(prevChild[i].uuid).parentNode,
               isReplace: true
             })
           })
@@ -154,36 +154,50 @@ function diffAttr (prevArr, curArr) {
 
 /**
  *
- * @param {object} initial standard parent
- * @param {object} ic standard child tree, It should have a key
- * @param {object} ac reference child tree, It should have a key
+ * @param {object} initParent standard parent obj
+ * @param {object} initial standard obj
+ * @param {object} accu accumulator obj
  * @param {number} index the traverse index
- * @param {object} accu accumulator
+ * @param {object} accuParent accumulator parent obj
  */
-function sortNode (initial, ic, ac, index, accu) {
-  if (ic.key) {
+function sortNode (parent, initial, accu, index, accuParent) {
+  if (initial === undefined || accu === undefined) {
+    return
+  }
+  if (initial.key) {
     // need move node
-    if (ic.key !== ac.key) {
+    if (initial.key !== accu.key) {
       // find moved obj from sorted
-      const moveObj = accu.child.find(item => item.key === ic.key)
-      if (initial.child[index + 1]) {
-        // find last obj before moved obj
-        const positionObj = accu.child.find(item => item.key === initial.child[index + 1].key)
-        // reduce current obj tree
-        accu = accu.child.filter(v => v.key === moveObj.key)  // remove
-        accu[index] = moveObj // insert
-        // add move target and position (both include uuid)
+      const moveObj = accuParent.child.find(item => item.key === initial.key)
+      if (parent.child[index - 1]) {
+        const lastOneKey = parent.child[index - 1].key
+        const positionIndex = accuParent.child.map(item => item.key).indexOf(lastOneKey) + 1
         moveQueue.push({
           moveNode: moveObj,
-          positionNode: positionObj
+          positionNode: accuParent.child[positionIndex]
         })
+        // consistent with real dom
+        const removeIndex = accuParent.child.map(item => item.key).indexOf(moveObj.key)
+        accuParent.child.splice(removeIndex, 1)
+        const change = accuParent.child.map(item => item.key).indexOf(lastOneKey) + 1
+        accuParent.child.splice(change, 0, moveObj)
+      } else {
+        // first is different
+        moveQueue.push({
+          moveNode: moveObj,
+          positionNode: accuParent.child[0]
+        })
+        // consistent with real dom
+        const removeIndex = accuParent.child.map(item => item.key).indexOf(moveObj.key)
+        accuParent.child.splice(removeIndex, 1)
+        accuParent.child.unshift(moveObj)
       }
     }
   }
   // recursive every child (if have)
-  if (ic.child.length > 0) {
-    for (var i = 0; i < ic.child.length; i++) {
-      sortNode(ic, ic.child[i], ac.child[i], i, ac)
+  if (initial.child.length > 0) {
+    for (var i = 0; i < initial.child.length; i++) {
+      sortNode(initial, initial.child[i], accu.child[i], i, accu)
     }
   }
 }
