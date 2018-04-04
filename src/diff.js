@@ -153,6 +153,23 @@ function diffAttr (prevArr, curArr) {
 }
 
 /**
+ * find index in array by key
+ * @param {*} arr
+ * @param {*} target
+ */
+function getIndexOfArray (arr, targetKey) {
+  return arr.map(item => item.key).indexOf(targetKey)
+}
+
+function delItem (arr, targetIndex) {
+  arr.splice(targetIndex, 1)
+}
+
+function insertItem (arr, position, newItem) {
+  arr.splice(position, 0, newItem)
+}
+
+/**
  *
  * @param {object} initParent standard parent obj
  * @param {object} initial standard obj
@@ -167,30 +184,32 @@ function sortNode (parent, initial, accu, index, accuParent) {
   if (initial.key) {
     // need move node
     if (initial.key !== accu.key) {
+      var accuChilds = accuParent.child
+      var initChilds = parent.child
       // find moved obj from sorted
-      const moveObj = accuParent.child.find(item => item.key === initial.key)
-      if (parent.child[index - 1]) {
-        const lastOneKey = parent.child[index - 1].key
-        const positionIndex = accuParent.child.map(item => item.key).indexOf(lastOneKey) + 1
+      const moveObj = accuChilds.find(item => item.key === initial.key)
+      if (initChilds[index - 1]) {
+        const lastOneKey = initChilds[index - 1].key
+        const positionIndex = getIndexOfArray(accuChilds, lastOneKey) + 1
         moveQueue.push({
           moveNode: moveObj,
-          positionNode: accuParent.child[positionIndex]
+          positionNode: accuChilds[positionIndex]
         })
         // consistent with real dom
-        const removeIndex = accuParent.child.map(item => item.key).indexOf(moveObj.key)
-        accuParent.child.splice(removeIndex, 1)
-        const change = accuParent.child.map(item => item.key).indexOf(lastOneKey) + 1
-        accuParent.child.splice(change, 0, moveObj)
+        const removeIndex = getIndexOfArray(accuChilds, moveObj.key)
+        delItem(accuChilds, removeIndex)
+        const change = getIndexOfArray(accuChilds, lastOneKey) + 1
+        insertItem(accuChilds, change, moveObj)
       } else {
-        // first is different
+        // the move node is the first node
         moveQueue.push({
           moveNode: moveObj,
-          positionNode: accuParent.child[0]
+          positionNode: accuChilds[0]
         })
         // consistent with real dom
-        const removeIndex = accuParent.child.map(item => item.key).indexOf(moveObj.key)
-        accuParent.child.splice(removeIndex, 1)
-        accuParent.child.unshift(moveObj)
+        const removeIndex = getIndexOfArray(accuChilds, moveObj.key)
+        delItem(accuChilds, removeIndex)
+        accuChilds.unshift(moveObj)
       }
     }
   }
