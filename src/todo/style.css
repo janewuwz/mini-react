@@ -62,6 +62,13 @@
   display: inline-block;
   margin: 0 20px;
   color: #6DABF5;
+  cursor: pointer;
+}
+
+.underline {
+  display: inline-block;
+  margin: 0 20px;
+  color: #6DABF5;
   border-bottom: 1px solid;
   cursor: pointer;
 }

@@ -248,6 +248,7 @@ function diffByKey (parentId, pre, cur) {
         }
       }
     } else {
+      console.log(cur)
     }
   })
   // based on previous

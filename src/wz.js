@@ -105,6 +105,7 @@ export class Component {
       //   render(document.getElementById('root'), this)
       // })
       this.state = {
+        ...this.state,
         ...newState
       }
       render(document.getElementById('root'), this)
