@@ -1,5 +1,6 @@
 import {walkTree} from './compileEle'
 import cloneDeep from './utils/cloneDeep'  // I know why to need expose
+import isEqual from './utils/isEqual'
 
 let diffResult = []
 let moveQueue = []
@@ -105,8 +106,7 @@ export function walkObj (root, prevs, curs) {
             diffResult.push({
               type: 'REMOVE_NODE',
               node: findNodeByUuid(res.uuid),
-              position: findNodeByUuid(prevChild[i].uuid).parentNode,
-              isReplace: true
+              position: findNodeByUuid(prevChild[i].uuid).parentNode
             })
           })
           prevs.child = [...cursChild] // ??????
@@ -248,7 +248,22 @@ function diffByKey (parentId, pre, cur) {
         }
       }
     } else {
-      console.log(cur)
+      // no key
+      if (cur.length > 0) {
+        for (var i = 0; i < cur.length; i++) {
+          for (var j = 0; j < cur[i].attr.length; j++) {
+            var equal = isEqual(pre[i].attr[j], cur[i].attr[j])
+            if (!equal) {
+              pre[i].attr[j] = cur[i].attr[j]
+              diffResult.push({
+                type: 'MODIFY_NODE',
+                node: pre[i].uuid,
+                content: cur[i].attr[j]
+              })
+            }
+          }
+        }
+      }
     }
   })
   // based on previous
@@ -272,6 +287,14 @@ function diffByKey (parentId, pre, cur) {
         }
       }
     } else {
+      if (cur.length > 0) {
+        for (var i = 0; i < cur.length; i++) {
+          for (var j = 0; j < cur[i].length; j++) {
+            var equal = isEqual(pre[i][j], cur[i][j])
+            console.log(equal)
+          }
+        }
+      }
     }
   })
   return result
