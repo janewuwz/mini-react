@@ -3,12 +3,18 @@ import cloneDeep from './utils/cloneDeep'  // I know why to need expose
 import isEqual from './utils/isEqual'
 
 let diffResult = []
-let moveQueue = []
 export default function diff (curTree, prevTree) {
   diffResult = []
-  moveQueue = []
   walkObj('root', prevTree, curTree)
   var initial = cloneDeep(curTree) // next new
+  applyDiff(initial)
+}
+
+function findNodeByUuid (uuid) {
+  return document.querySelectorAll(`[wz-id="${uuid}"]`)[0]
+}
+
+function applyDiff (initial) {
   diffResult.forEach(diffItem => {
     const {type, node, position} = diffItem
     if (type === 'ADD_NODE') {
@@ -23,22 +29,15 @@ export default function diff (curTree, prevTree) {
       findNodeByUuid(diffItem.node).setAttribute('class', diffItem.content.className)
     }
   })
+  diffResult = []
   sortNode('', initial, window.prevTree)
-  moveQueue.forEach(m => {
-    const {moveNode, positionNode} = m
+  diffResult.forEach(diffItem => {
+    const {moveNode, positionNode} = diffItem
     var mn = findNodeByUuid(moveNode.uuid)
     var pn = findNodeByUuid(positionNode.uuid)
     mn.parentNode.insertBefore(mn, pn)
   })
-  moveQueue = []
-  if (diffResult.length === 0) {
-    // window.tree = window.prevTree
-  }
   window.tree = window.prevTree
-}
-
-function findNodeByUuid (uuid) {
-  return document.querySelectorAll(`[wz-id="${uuid}"]`)[0]
 }
 
 /**
@@ -189,7 +188,8 @@ function sortNode (parent, initial, accu, index, accuParent) {
       if (initChilds[index - 1]) {
         const lastOneKey = initChilds[index - 1].key
         const positionIndex = getIndexOfArray(accuChilds, lastOneKey) + 1
-        moveQueue.push({
+        diffResult.push({
+          type: 'MOVE_NODE',
           moveNode: moveObj,
           positionNode: accuChilds[positionIndex]
         })
@@ -200,7 +200,8 @@ function sortNode (parent, initial, accu, index, accuParent) {
         insertItem(accuChilds, change, moveObj)
       } else {
         // the move node is the first node
-        moveQueue.push({
+        diffResult.push({
+          type: 'MOVE_NODE',
           moveNode: moveObj,
           positionNode: accuChilds[0]
         })
@@ -249,21 +250,21 @@ function diffByKey (parentId, pre, cur) {
       }
     } else {
       // no key
-      if (cur.length > 0) {
-        for (var i = 0; i < cur.length; i++) {
-          for (var j = 0; j < cur[i].attr.length; j++) {
-            var equal = isEqual(pre[i].attr[j], cur[i].attr[j])
-            if (!equal) {
-              pre[i].attr[j] = cur[i].attr[j]
-              diffResult.push({
-                type: 'MODIFY_NODE',
-                node: pre[i].uuid,
-                content: cur[i].attr[j]
-              })
-            }
-          }
-        }
-      }
+      // if (cur.length > 0) {
+      //   for (var i = 0; i < cur.length; i++) {
+      //     for (var j = 0; j < cur[i].attr.length; j++) {
+      //       var equal = isEqual(pre[i].attr[j], cur[i].attr[j])
+      //       if (!equal) {
+      //         pre[i].attr[j] = cur[i].attr[j]
+      //         diffResult.push({
+      //           type: 'MODIFY_NODE',
+      //           node: pre[i].uuid,
+      //           content: cur[i].attr[j]
+      //         })
+      //       }
+      //     }
+      //   }
+      // }
     }
   })
   // based on previous
