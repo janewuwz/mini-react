@@ -13,6 +13,12 @@ import {render} from './render'
 
 window.tree = {}
 window.temp = []
+
+/**
+ * @param {string<tag> | Component}
+ * @param {object <attr> | <props>}
+ * @param {string <txt> | ... arbitrary rest child}
+ */
 export function makeElement () {
   const originAttr = ['name', 'id', 'type', 'onkeypress', 'key', 'onclick', 'className', 'placeholder']
   if (typeof arguments[0] === 'function') {
@@ -99,6 +105,7 @@ export class Component {
       //   render(document.getElementById('root'), this)
       // })
       this.state = {
+        ...this.state,
         ...newState
       }
       render(document.getElementById('root'), this)
