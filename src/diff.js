@@ -31,6 +31,7 @@ function applyDiff (initial) {
   })
   diffResult = []
   sortNode('', initial, window.prevTree)
+  //  move node
   diffResult.forEach(diffItem => {
     const {moveNode, positionNode} = diffItem
     var mn = findNodeByUuid(moveNode.uuid)
@@ -76,45 +77,9 @@ export function walkObj (root, prevs, curs) {
       })
       prevs.child = prevs.child.filter(p => p.key !== node.key)
     }
+    // diffChild(prevChild, cursChild, prevs)
     for (var i = 0; i < loneOne; i++) {
-      const prevKey = prevChild.map(item => item.key)
-      const cursKey = cursChild.map(item => item.key)
-      if (prevChild[i] === undefined) {
-        // add item
-        const diffKey = diffByKey(prevKey, cursKey)
-        if (diffKey.length > 1) {
-          // empty child
-          diffKey.forEach((p, i) => {
-            var res = cursChild.find(c => c.key === p)
-            diffResult.push({
-              type: 'ADD_NODE',
-              position: findNodeByUuid(prevs.uuid),
-              node: res
-            })
-          })
-          prevs.child = [...cursChild]
-          return
-        }
-      } else if (cursChild[i] === undefined) {
-        // remove child
-        // const diffKey = getDiffKey(prevKey, cursKey)
-        if (diffKey.length > 1) {
-          // batch remove nodes
-          diffKey.forEach((p, i) => {
-            var res = prevChild.find(c => c.key === p)
-            diffResult.push({
-              type: 'REMOVE_NODE',
-              node: findNodeByUuid(res.uuid),
-              position: findNodeByUuid(prevChild[i].uuid).parentNode
-            })
-          })
-          prevs.child = [...cursChild] // ??????
-          return
-        }
-      } else {
-        // compare every item
-        walkObj('', prevChild[i], cursChild[i])
-      }
+      walkObj('', prevChild[i], cursChild[i])
     }
   } else {
     // 彻底替换，重新渲染
@@ -250,21 +215,6 @@ function diffByKey (parentId, pre, cur) {
       }
     } else {
       // no key
-      // if (cur.length > 0) {
-      //   for (var i = 0; i < cur.length; i++) {
-      //     for (var j = 0; j < cur[i].attr.length; j++) {
-      //       var equal = isEqual(pre[i].attr[j], cur[i].attr[j])
-      //       if (!equal) {
-      //         pre[i].attr[j] = cur[i].attr[j]
-      //         diffResult.push({
-      //           type: 'MODIFY_NODE',
-      //           node: pre[i].uuid,
-      //           content: cur[i].attr[j]
-      //         })
-      //       }
-      //     }
-      //   }
-      // }
     }
   })
   // based on previous
