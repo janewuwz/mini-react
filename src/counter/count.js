@@ -1,5 +1,5 @@
-import {Component, makeElement} from './wz'
-import {render} from './render'
+import {Component, makeElement} from '../wz'
+import {render} from '../render'
 
 class Instance extends Component {
   constructor() {

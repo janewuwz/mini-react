@@ -1,12 +1,12 @@
-import {walkTree} from './compileEle'
+import {walkTree} from './compileEl'
 import cloneDeep from './utils/cloneDeep'  // I know why to need expose
 import isEqual from './utils/isEqual'
 
 let diffResult = []
-export default function diff (curTree, prevTree) {
+export default function diff (nextTree, curTree) {
   diffResult = []
-  walkObj('root', prevTree, curTree)
-  var initial = cloneDeep(curTree) // next new
+  walkObj('root', curTree, nextTree)
+  var initial = cloneDeep(nextTree) // next new
   applyDiff(initial)
 }
 
@@ -26,11 +26,12 @@ function applyDiff (initial) {
       window.tree = window.prevTree
     }
     if (type === 'MODIFY_NODE') {
+      // only className in the todo case
       findNodeByUuid(diffItem.node).setAttribute('class', diffItem.content.className)
     }
   })
   diffResult = []
-  sortNode('', initial, window.prevTree)
+  reorder('', initial, window.prevTree)
   //  move node
   diffResult.forEach(diffItem => {
     const {moveNode, positionNode} = diffItem
@@ -43,20 +44,20 @@ function applyDiff (initial) {
 
 /**
  *
- * @param {*} root
- * @param {*} prevs
- * @param {*} curs
+ * @param {string} parentId
+ * @param {object} prevs
+ * @param {object} next
  */
-export function walkObj (root, prevs, curs) {
-  if (prevs === undefined || curs === undefined) {
+export function walkObj (root, curs, next) {
+  if (curs === undefined || next === undefined) {
     return
   }
-  if (prevs.type === curs.type) {
+  if (curs.type === next.type) {
     // compare child
-    let prevChild = prevs.child
     let cursChild = curs.child
-    const loneOne = Math.max(prevChild.length, cursChild.length)
-    const diffKey = diffByKey(prevs.uuid, prevChild, cursChild)
+    let nextChild = next.child
+    const loneOne = Math.max(cursChild.length, nextChild.length)
+    const diffKey = diffByKey(curs.uuid, cursChild, nextChild)
     while (diffKey.add.length > 0) {
       var adds = diffKey.add.shift()
       const {parent, node} = adds
@@ -65,7 +66,7 @@ export function walkObj (root, prevs, curs) {
         position: findNodeByUuid(parent),
         node: node
       })
-      prevChild.push(node)
+      cursChild.push(node)
     }
     while (diffKey.remove.length > 0) {
       var removes = diffKey.remove.pop()
@@ -75,50 +76,46 @@ export function walkObj (root, prevs, curs) {
         position: findNodeByUuid(parent),
         node: findNodeByUuid(node.uuid)
       })
-      prevs.child = prevs.child.filter(p => p.key !== node.key)
+      curs.child = curs.child.filter(p => p.key !== node.key)
     }
-    // diffChild(prevChild, cursChild, prevs)
+    // recurse child
     for (var i = 0; i < loneOne; i++) {
-      walkObj('', prevChild[i], cursChild[i])
+      walkObj('', cursChild[i], nextChild[i])
     }
   } else {
-    // 彻底替换，重新渲染
-
+    // rebuild render
+    walkTree(window.tree)
   }
 }
 
 /**
  *
- * @param {array} prevArr
- * @param {array} curArr
+ * @param {array} cur
+ * @param {array} next
  */
-function diffAttr (prevArr, curArr) {
-  // TODO txt
-  // modify attr
-  var len = Math.max(prevArr.length, curArr.length)
-  for (var i = 0; i < len; i++) {
-    for (var j = 0; j < curArr[i].attr.length; j++) {
-      // only className
-      if (curArr[i].attr[j].className !== prevArr[i].attr[j].className) {
+function diffModify (cur, next) {
+  if (next === undefined || cur === undefined) return
+  for (var i = 0; i < next.length; i++) {
+    if (cur[i] === undefined) return
+    if (!isEqual(next[i].text, cur[i].text)) {
+      // dom text changed
+    }
+    for (var j = 0; j < next[i].attr.length; j++) {
+      if (!isEqual(next[i].attr[j], cur[i].attr[j])) {
         diffResult.push({
           type: 'MODIFY_NODE',
-          node: prevArr[i].uuid,
-          content: curArr[i].attr[j]
+          node: cur[i].uuid,
+          content: next[i].attr[j]
         })
-        prevArr[i].attr[j] = {...curArr[i].attr[j]}
+        cur[i].attr[j] = {...next[i].attr[j]}
       }
     }
-    if (prevArr[i].child.length > 0) {
-      diffAttr(prevArr.child, curArr.child)
+    if (cur[i].child.length > 0) {
+      diffModify(cur.child, next.child)
     }
   }
 }
 
-/**
- * find index in array by key
- * @param {*} arr
- * @param {*} target
- */
 function getIndexOfArray (arr, targetKey) {
   return arr.map(item => item.key).indexOf(targetKey)
 }
@@ -136,10 +133,10 @@ function insertItem (arr, position, newItem) {
  * @param {object} initParent standard parent obj
  * @param {object} initial standard obj
  * @param {object} accu accumulator obj
- * @param {number} index the traverse index
- * @param {object} accuParent accumulator parent obj
+ * @param {? number} index the traverse index | not necessary
+ * @param {? object} accuParent accumulator parent obj | not necessary
  */
-function sortNode (parent, initial, accu, index, accuParent) {
+function reorder (parent, initial, accu, index, accuParent) {
   if (initial === undefined || accu === undefined) {
     return
   }
@@ -177,10 +174,10 @@ function sortNode (parent, initial, accu, index, accuParent) {
       }
     }
   }
-  // recursive every child (if have)
+  // recursing every child (if have)
   if (initial.child.length > 0) {
     for (var i = 0; i < initial.child.length; i++) {
-      sortNode(initial, initial.child[i], accu.child[i], i, accu)
+      reorder(initial, initial.child[i], accu.child[i], i, accu)
     }
   }
 }
@@ -191,59 +188,46 @@ function sortNode (parent, initial, accu, index, accuParent) {
  * @param {object} prevone
  * @param {object} currentone
  */
-function diffByKey (parentId, pre, cur) {
-  const result = {add: [], remove: [], move: []}
+function diffByKey (parentId, cur, next) {
+  const result = {add: [], remove: []}
   // based on current
-  cur.forEach((item, index) => {
+  next.forEach((item, index) => {
     if (item.key) {
-      var a = pre.find(w => w.key === item.key)
-      var b = cur.find(w => w.key === item.key)
-
+      var curObj = cur.find(w => w.key === item.key)
+      var nextObj = next.find(w => w.key === item.key)
       // add key
-      if (a === undefined) {
-        result.add.push({parent: parentId, node: b})
+      if (curObj === undefined) {
+        result.add.push({parent: parentId, node: nextObj})
       }
       // change key
-      if (a !== undefined && b !== undefined) {
+      if (curObj !== undefined && nextObj !== undefined) {
         // change attr
-
-        if (a.child.length > 0 && b.child.length > 0) {
+        if (curObj.child.length > 0 && nextObj.child.length > 0) {
           // diff child attr
-          diffAttr(a.child, b.child)
-          walkObj(parentId, a, b)
+          diffModify(curObj.child, nextObj.child)
+          walkObj(parentId, curObj, nextObj)
         }
       }
-    } else {
-      // no key
     }
   })
   // based on previous
-  pre.forEach((item, index) => {
+  cur.forEach((item, index) => {
     if (item.key) {
-      var a = pre.find(w => w.key === item.key)
-      var b = cur.find(w => w.key === item.key)
+      var curObj = cur.find(w => w.key === item.key)
+      var nextObj = next.find(w => w.key === item.key)
 
       // remove key
-      if (b === undefined) {
-        result.remove.push({parent: parentId, node: a})
+      if (nextObj === undefined) {
+        result.remove.push({parent: parentId, node: curObj})
       }
       // change key
-      if (a !== undefined && b !== undefined) {
+      if (curObj !== undefined && nextObj !== undefined) {
         // change attr
 
-        if (a.child.length > 0 && b.child.length > 0) {
+        if (curObj.child.length > 0 && nextObj.child.length > 0) {
           // diff child attr
-          diffAttr(a.child, b.child)
-          walkObj(parentId, a, b)
-        }
-      }
-    } else {
-      if (cur.length > 0) {
-        for (var i = 0; i < cur.length; i++) {
-          for (var j = 0; j < cur[i].length; j++) {
-            var equal = isEqual(pre[i][j], cur[i][j])
-            console.log(equal)
-          }
+          diffModify(curObj.child, nextObj.child)
+          walkObj(parentId, curObj, nextObj)
         }
       }
     }

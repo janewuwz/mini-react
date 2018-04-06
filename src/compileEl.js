@@ -18,8 +18,8 @@ export function walkTree (element, parent) {
     })
   }
   parent.appendChild(dom)
-  if (element.txt && element.txt !== '') {
-    dom.appendChild(document.createTextNode(element.txt))
+  if (element.text && element.text !== '') {
+    dom.appendChild(document.createTextNode(element.text))
   }
   if (element.child.length > 0) {
     element.child.forEach(item => {

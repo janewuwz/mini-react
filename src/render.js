@@ -1,41 +1,40 @@
-import {realRender} from './compileEle'
+import {realRender} from './compileEl'
 import cloneDeep from './utils/cloneDeep'
 import diff from './diff'
 
-// export function
-let child
+let componentsPool = []
+
 export function render (component, Node, resetProps) {
   let node = Node
   let afterRender
-
-  if (component === undefined) {
-    // child component
-    child = new Node()
-    if (resetProps) {
-      const {key, ...other} = resetProps
-      child.props = other
-      child.key = key
+  let child = Node
+  let childRender
+  if (resetProps !== undefined) {
+    const {key, displayName, ...other} = resetProps
+    var oldEle = componentsPool[key] || componentsPool[displayName]
+    child = oldEle || new Node()
+    if (key) {
+      componentsPool[key] = child
+    } else {
+      componentsPool[child.displayName] = child
     }
-    child.ComponentWillMount()
-    let aa = child.render()
-    child.ComponentDidMount()
-    // if (child === undefined) {
-    //   child = new Node()
-    //   if (resetProps) {
-    //     child.props = {...resetProps}
-    //   }
-    //   child.ComponentWillMount()
-    //   child.render()
-    //   child.ComponentDidMount()
-    // } else {
-    //   child.ComponentWillUpdate()
-    //   child.render()
-    //   child.ComponentDidUpdate()
-    // }
-
-    return aa
+    child.props = other
+    child.key = key
+    if (oldEle) {
+      child.ComponentWillUpdate()
+    } else {
+      child.ComponentWillMount()
+    }
+    childRender = child.render()
+    if (oldEle) {
+      child.ComponentDidUpdate()
+    } else {
+      child.ComponentDidMount()
+    }
+    return childRender
   }
-  if (typeof Node === 'function') {
+
+  if (typeof Node === 'function' && resetProps === undefined) {
     // init mount
     node = new Node()
     node.ComponentWillMount()
