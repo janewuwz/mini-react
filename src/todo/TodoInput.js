@@ -2,9 +2,6 @@ import {Component, makeElement} from '../wz'
 import './style.css'
 
 export default class TodoInput extends Component {
-  constructor() {
-    super()
-  }
   handleKeyPress = (e) => {
     const key = e.key;
     const value = e.target.value;
