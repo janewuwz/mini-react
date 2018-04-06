@@ -1,15 +1,4 @@
 import {render} from './render'
-// function updateState (self) {
-//   return new Promise((resolve, reject) => {
-//     self.batchedState.forEach(element => {
-//       self.state = {
-//         ...self.state,
-//         ...element
-//       }
-//     })
-//     render(document.getElementById('root'), self)
-//   })
-// }
 
 window.tree = {}
 window.temp = []
@@ -108,26 +97,12 @@ export class Component {
     this.batchedState = []
     this.batchedCb = []
     this.setState = (newState, cb) => {
-      // window.prevTree = {...window.}
-      // this.batchedState.push(newState)
-      // this.batched.forEach(item => {
-      //   this.state = {
-      //     ...this.state,
-      //     ...item.newState
-      //   }
-      //   item.cb && item.cb()
-      //   render(document.getElementById('root'), this)
-      // })
       this.state = {
         ...this.state,
         ...newState
       }
       render(document.getElementById('root'), this)
-      // updateState(this).then(cb && cb())
     }
-    // this.render = function () {
-    //   console.log('ren')
-    // }
   }
 
   ComponentWillMount () {
@@ -142,4 +117,5 @@ export class Component {
   ComponentWillUnMount () {
 
   }
+  render () {}
 }
