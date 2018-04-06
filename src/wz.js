@@ -142,8 +142,4 @@ export class Component {
   ComponentWillUnMount () {
 
   }
-  // rrender () {
-  //   console.log('render')
-  //   // this.isMount = true
-  // }
 }
