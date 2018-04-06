@@ -22,8 +22,8 @@ export default class TodoApp extends Component {
       ]
     }
   }
-  handleTodoItemAdded = title => {
 
+  handleTodoItemAdded = title => {
     this.setState({
       todos: this.state.todos.concat([
         {

@@ -1,4 +1,4 @@
-import {realRender} from './compileEle'
+import {realRender} from './compileEl'
 import cloneDeep from './utils/cloneDeep'
 import diff from './diff'
 
@@ -19,19 +19,19 @@ export function render (component, Node, resetProps) {
     child.ComponentWillMount()
     let aa = child.render()
     child.ComponentDidMount()
-    // if (child === undefined) {
-    //   child = new Node()
-    //   if (resetProps) {
-    //     child.props = {...resetProps}
-    //   }
-    //   child.ComponentWillMount()
-    //   child.render()
-    //   child.ComponentDidMount()
-    // } else {
-    //   child.ComponentWillUpdate()
-    //   child.render()
-    //   child.ComponentDidUpdate()
-    // }
+    if (child === undefined) {
+      child = new Node()
+      if (resetProps) {
+        child.props = {...resetProps}
+      }
+      child.ComponentWillMount()
+      child.render()
+      child.ComponentDidMount()
+    } else {
+      child.ComponentWillUpdate()
+      child.render()
+      child.ComponentDidUpdate()
+    }
 
     return aa
   }

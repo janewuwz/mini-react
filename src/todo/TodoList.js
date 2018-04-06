@@ -19,7 +19,7 @@ export default class TodoList extends Component {
      * </div>
      */
     const { todos, onTodoItemRemoved, onTodoItemToggled } = this.props
-    return makeElement('div', {}, (todos || []).map(function (v, k) {
+    return makeElement('div', null, (todos || []).map(function (v, k) {
       return makeElement(TodoItem, {'onTodoItemRemoved': onTodoItemRemoved, 'onTodoItemToggled': onTodoItemToggled, todo: v, key: v.id}, '')
     }))
   }
