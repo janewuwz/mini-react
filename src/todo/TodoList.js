@@ -2,6 +2,9 @@ import {Component, makeElement} from '../wz'
 import TodoItem from './TodoItem'
 
 export default class TodoList extends Component {
+  constructor () {
+    super()
+  }
   render () {
     /**
      * <div>

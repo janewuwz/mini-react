@@ -4,7 +4,6 @@ import './style.css'
 export default class TodoInput extends Component {
   constructor() {
     super()
-    console.log('todoinput')
   }
   handleKeyPress = (e) => {
     const key = e.key;

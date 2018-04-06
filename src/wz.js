@@ -14,6 +14,12 @@ import {render} from './render'
 window.tree = {}
 window.temp = []
 
+function getFuncName (func) {
+  const funcStr = func.toString()
+  var re = /function\s(.*)\(/g
+  return re.exec(funcStr)[1]
+}
+
 /**
  * @param {string<tag> | Component}
  * @param {object <attr> | <props>}
@@ -23,6 +29,7 @@ export function makeElement () {
   const originAttr = ['name', 'id', 'type', 'onkeypress', 'key', 'onclick', 'className', 'placeholder']
   // child component
   if (typeof arguments[0] === 'function') {
+    const funcName = getFuncName(arguments[0])
     const resetProps = {}
     if (arguments[1]) {
       // child props
@@ -34,6 +41,7 @@ export function makeElement () {
         // props attr
         if (!originAttr.includes(item[0]) && item[0] !== 'key') {
           resetProps[item[0]] = item[1]
+          resetProps.displayName = funcName
         }
       })
     }
@@ -94,7 +102,7 @@ export function makeElement () {
 
 export class Component {
   constructor () {
-    this.jsx = null
+    this.displayName = this.constructor.name
     this.state = {}
     this.props = {}
     this.batchedState = []
@@ -117,13 +125,14 @@ export class Component {
       render(document.getElementById('root'), this)
       // updateState(this).then(cb && cb())
     }
+    // this.render = function () {
+    //   console.log('ren')
+    // }
   }
 
   ComponentWillMount () {
-
   }
   ComponentDidMount () {
-
   }
   ComponentWillUpdate () {
   }
@@ -133,6 +142,8 @@ export class Component {
   ComponentWillUnMount () {
 
   }
-  render () {
-  }
+  // rrender () {
+  //   console.log('render')
+  //   // this.isMount = true
+  // }
 }
