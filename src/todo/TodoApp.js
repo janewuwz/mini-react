@@ -6,6 +6,7 @@ import TodoFilter from './TodoFilter'
 export default class TodoApp extends Component {
   constructor() {
     super()
+    console.log('todo app cons')
     this.state = {
       show: 'all',
       todos: [

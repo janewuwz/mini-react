@@ -26,7 +26,7 @@ function applyDiff (initial) {
       window.tree = window.prevTree
     }
     if (type === 'MODIFY_NODE') {
-      // only className in todo case
+      // only className in the todo case
       findNodeByUuid(diffItem.node).setAttribute('class', diffItem.content.className)
     }
   })
@@ -44,9 +44,9 @@ function applyDiff (initial) {
 
 /**
  *
- * @param {*} root
- * @param {*} prevs
- * @param {*} next
+ * @param {string} parentId
+ * @param {object} prevs
+ * @param {object} next
  */
 export function walkObj (root, curs, next) {
   if (curs === undefined || next === undefined) {
@@ -90,8 +90,8 @@ export function walkObj (root, curs, next) {
 
 /**
  *
- * @param {array} prev
  * @param {array} cur
+ * @param {array} next
  */
 function diffModify (cur, next) {
   if (next === undefined || cur === undefined) return
@@ -116,11 +116,6 @@ function diffModify (cur, next) {
   }
 }
 
-/**
- * find index in array by key
- * @param {*} arr
- * @param {*} target
- */
 function getIndexOfArray (arr, targetKey) {
   return arr.map(item => item.key).indexOf(targetKey)
 }
@@ -138,8 +133,8 @@ function insertItem (arr, position, newItem) {
  * @param {object} initParent standard parent obj
  * @param {object} initial standard obj
  * @param {object} accu accumulator obj
- * @param {number} index the traverse index
- * @param {object} accuParent accumulator parent obj
+ * @param {? number} index the traverse index | not necessary
+ * @param {? object} accuParent accumulator parent obj | not necessary
  */
 function reorder (parent, initial, accu, index, accuParent) {
   if (initial === undefined || accu === undefined) {

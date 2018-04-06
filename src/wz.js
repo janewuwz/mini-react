@@ -21,7 +21,6 @@ window.temp = []
  */
 export function makeElement () {
   const originAttr = ['name', 'id', 'type', 'onkeypress', 'key', 'onclick', 'className', 'placeholder']
-
   // child component
   if (typeof arguments[0] === 'function') {
     const resetProps = {}
