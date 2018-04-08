@@ -3,6 +3,7 @@ import {render} from './render'
 window.tree = {}
 window.temp = []
 
+// get child component's name
 function getFuncName (func) {
   const funcStr = func.toString()
   var re = /function\s(.*)\(/g
@@ -13,8 +14,10 @@ function getFuncName (func) {
  * @param {string<tag> | Component}
  * @param {object <attr> | <props>}
  * @param {string <text> | ... arbitrary rest child}
+ * @returns {object} virtual dom
  */
 export function makeElement () {
+  // Exhaustion origin props
   const originAttr = ['name', 'id', 'type', 'onkeypress', 'key', 'onclick', 'className', 'placeholder']
   // child component
   if (typeof arguments[0] === 'function') {
@@ -22,7 +25,7 @@ export function makeElement () {
     const resetProps = {}
     if (arguments[1]) {
       // child props
-      Object.entries(arguments[1]).map(item => {
+      Object.entries(arguments[1]).forEach(item => {
         if (item[0] === 'key') {
           resetProps.key = item[1]
           window.temp.push(item[1])
@@ -44,8 +47,8 @@ export function makeElement () {
   const attr = arguments[1]
   if (attr !== null) {
     // attr
-    Object.entries(attr).map(item => {
-        // 一般属性
+    Object.entries(attr).forEach(item => {
+        // general props
       if (originAttr.includes(item[0])) {
         // console.log(item)
         window.tree.attr.push({[item[0]]: item[1]})
@@ -54,17 +57,17 @@ export function makeElement () {
   }
   const rest = [...arguments].slice(2)
 
-  // textnode为字符串
+  // textnode is string
   if (rest.length === 1 && typeof rest[0] === 'string') {
     window.tree.text = rest[0]
     return window.tree
   }
-  // textnode为数字
+  // textnode is number
   if (rest.length === 1 && typeof rest[0] === 'number') {
     window.tree.text = rest[0]
     return window.tree
   }
-  // 多个childnode
+  // many childnode
   if (rest.length >= 1) {
     const indexes = []
     for (var i = 0; i < rest.length; i++) {
@@ -72,6 +75,7 @@ export function makeElement () {
     }
     rest.forEach(item => {
       if (Array.isArray(item)) {
+        // map render item
         window.tree.child = item
       } else {
         if (item.key === undefined) {
@@ -110,6 +114,9 @@ export class Component {
   ComponentDidMount () {
   }
   ComponentWillUpdate () {
+  }
+  shouldComponentUpdate () {
+    return true
   }
   ComponentDidUpdate () {
 

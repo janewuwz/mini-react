@@ -1,3 +1,5 @@
+// deep clone obejct
+// return the new object
 export default function cloneDeep (srcObj) {
   let result, v, k
   result = Array.isArray(srcObj) ? [] : {}
