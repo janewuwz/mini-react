@@ -107,6 +107,9 @@ export class Component {
       }
       render(document.getElementById('root'), this)
     }
+    // this.render = function () {
+    //   console.log('ren')
+    // }
   }
 
   ComponentWillMount () {
