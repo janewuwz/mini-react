@@ -1,6 +1,7 @@
 import {walkTree} from './compileEl'
 import cloneDeep from './utils/cloneDeep'  // I know why to need expose
 import isEqual from './utils/isEqual'
+import {context, updateContext} from './wz'
 
 let diffResult = []
 export default function diff (nextTree, curTree) {
@@ -20,11 +21,11 @@ function applyDiff (initial) {
     const {type, node, position} = diffItem
     if (type === 'ADD_NODE') {
       walkTree(node, position)
-      window.tree = window.prevTree
+      updateContext(window.prevTree)
     }
     if (type === 'REMOVE_NODE') {
       position.removeChild(node)
-      window.tree = window.prevTree
+      updateContext(window.prevTree)
     }
     if (type === 'MODIFY_NODE') {
       // only className in the todo case
@@ -41,7 +42,7 @@ function applyDiff (initial) {
     var destination = findNodeByUuid(positionNode.uuid) // node after moved node which should be inserted here
     move.parentNode.insertBefore(move, destination)
   })
-  window.tree = window.prevTree
+  updateContext(window.prevTree)
 }
 
 /**
@@ -87,7 +88,7 @@ export function walkObj (root, curs, next) {
     }
   } else {
     // rebuild render
-    walkTree(window.tree)
+    walkTree(context)
   }
 }
 

@@ -1,7 +1,15 @@
 import {render} from './render'
 
-window.tree = {}
 window.temp = []
+export let context = {}
+
+export function updateContext (newContext) {
+  if (newContext !== null) {
+    context = newContext
+    return
+  }
+  context = {}
+}
 
 // get child component's name
 function getFuncName (func) {
@@ -40,10 +48,10 @@ export function makeElement () {
     return render(undefined, arguments[0], resetProps)
   }
 
-  window.tree = {}
-  window.tree.type = arguments[0]
-  window.tree.child = []
-  window.tree.attr = []
+  context = {}
+  context.type = arguments[0]
+  context.child = []
+  context.attr = []
   const attr = arguments[1]
   if (attr !== null) {
     // attr
@@ -51,7 +59,7 @@ export function makeElement () {
         // general props
       if (originAttr.includes(item[0])) {
         // console.log(item)
-        window.tree.attr.push({[item[0]]: item[1]})
+        context.attr.push({[item[0]]: item[1]})
       }
     })
   }
@@ -59,13 +67,13 @@ export function makeElement () {
 
   // textnode is string
   if (rest.length === 1 && typeof rest[0] === 'string') {
-    window.tree.text = rest[0]
-    return window.tree
+    context.text = rest[0]
+    return context
   }
   // textnode is number
   if (rest.length === 1 && typeof rest[0] === 'number') {
-    window.tree.text = rest[0]
-    return window.tree
+    context.text = rest[0]
+    return context
   }
   // many childnode
   if (rest.length >= 1) {
@@ -76,26 +84,27 @@ export function makeElement () {
     rest.forEach(item => {
       if (Array.isArray(item)) {
         // map render item
-        window.tree.child = item
+        context.child = item
       } else {
         if (item.key === undefined) {
           item.key = indexes.shift()
         }
         if (window.temp.length > 0) {
-          window.tree.key = window.temp.pop()
+          context.key = window.temp.pop()
         }
-        window.tree.child.push(item)
+        context.child.push(item)
       }
     })
-    return window.tree
+    return context
   }
   // other case I don't consider
-  return window.tree
+  return context
 }
 
 export class Component {
   constructor () {
     this.displayName = this.constructor.name
+    this.context = context
     this.state = {}
     this.props = {}
     this.batchedState = []

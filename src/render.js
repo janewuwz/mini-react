@@ -1,6 +1,7 @@
 import {realRender} from './compileEl'
 import cloneDeep from './utils/cloneDeep'
 import diff from './diff'
+import {context, updateContext} from './wz'
 
 // save components to reuse
 let componentsPool = {}
@@ -45,15 +46,15 @@ export function render (component, Node, resetProps) {
     node = new Node()
     node.ComponentWillMount()
     node.render()
-    realRender(window.tree)
+    realRender(context)
     node.ComponentDidMount()
   } else {
     // update
     node.ComponentWillUpdate()
-    window.prevTree = cloneDeep(window.tree)
-    window.tree = {}
+    window.prevTree = cloneDeep(context)
+    updateContext(null)
     node.render()
-    diff(window.tree, window.prevTree)
+    diff(context, window.prevTree)
     node.ComponentDidUpdate()
   }
 }
