@@ -1,8 +1,17 @@
 import {render} from './render'
 
-window.tree = {}
 window.temp = []
+export let context = {}
 
+export function updateContext (newContext) {
+  if (newContext !== null) {
+    context = newContext
+    return
+  }
+  context = {}
+}
+
+// get child component's name
 function getFuncName (func) {
   const funcStr = func.toString()
   var re = /function\s(.*)\(/g
@@ -13,8 +22,10 @@ function getFuncName (func) {
  * @param {string<tag> | Component}
  * @param {object <attr> | <props>}
  * @param {string <text> | ... arbitrary rest child}
+ * @returns {object} virtual dom
  */
 export function makeElement () {
+  // Exhaustion origin props
   const originAttr = ['name', 'id', 'type', 'onkeypress', 'key', 'onclick', 'className', 'placeholder']
   // child component
   if (typeof arguments[0] === 'function') {
@@ -22,7 +33,7 @@ export function makeElement () {
     const resetProps = {}
     if (arguments[1]) {
       // child props
-      Object.entries(arguments[1]).map(item => {
+      Object.entries(arguments[1]).forEach(item => {
         if (item[0] === 'key') {
           resetProps.key = item[1]
           window.temp.push(item[1])
@@ -37,34 +48,34 @@ export function makeElement () {
     return render(undefined, arguments[0], resetProps)
   }
 
-  window.tree = {}
-  window.tree.type = arguments[0]
-  window.tree.child = []
-  window.tree.attr = []
+  context = {}
+  context.type = arguments[0]
+  context.child = []
+  context.attr = []
   const attr = arguments[1]
   if (attr !== null) {
     // attr
-    Object.entries(attr).map(item => {
-        // 一般属性
+    Object.entries(attr).forEach(item => {
+        // general props
       if (originAttr.includes(item[0])) {
         // console.log(item)
-        window.tree.attr.push({[item[0]]: item[1]})
+        context.attr.push({[item[0]]: item[1]})
       }
     })
   }
   const rest = [...arguments].slice(2)
 
-  // textnode为字符串
+  // textnode is string
   if (rest.length === 1 && typeof rest[0] === 'string') {
-    window.tree.text = rest[0]
-    return window.tree
+    context.text = rest[0]
+    return context
   }
-  // textnode为数字
+  // textnode is number
   if (rest.length === 1 && typeof rest[0] === 'number') {
-    window.tree.text = rest[0]
-    return window.tree
+    context.text = rest[0]
+    return context
   }
-  // 多个childnode
+  // many childnode
   if (rest.length >= 1) {
     const indexes = []
     for (var i = 0; i < rest.length; i++) {
@@ -72,26 +83,28 @@ export function makeElement () {
     }
     rest.forEach(item => {
       if (Array.isArray(item)) {
-        window.tree.child = item
+        // map render item
+        context.child = item
       } else {
         if (item.key === undefined) {
           item.key = indexes.shift()
         }
         if (window.temp.length > 0) {
-          window.tree.key = window.temp.pop()
+          context.key = window.temp.pop()
         }
-        window.tree.child.push(item)
+        context.child.push(item)
       }
     })
-    return window.tree
+    return context
   }
   // other case I don't consider
-  return window.tree
+  return context
 }
 
 export class Component {
   constructor () {
     this.displayName = this.constructor.name
+    this.context = context
     this.state = {}
     this.props = {}
     this.batchedState = []
@@ -113,6 +126,9 @@ export class Component {
   ComponentDidMount () {
   }
   ComponentWillUpdate () {
+  }
+  shouldComponentUpdate () {
+    return true
   }
   ComponentDidUpdate () {
 

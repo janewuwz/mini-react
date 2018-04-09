@@ -1,12 +1,13 @@
 import {walkTree} from './compileEl'
 import cloneDeep from './utils/cloneDeep'  // I know why to need expose
 import isEqual from './utils/isEqual'
+import {context, updateContext} from './wz'
 
 let diffResult = []
 export default function diff (nextTree, curTree) {
   diffResult = []
   walkObj('root', curTree, nextTree)
-  var initial = cloneDeep(nextTree) // next new
+  var initial = cloneDeep(nextTree) // the blueprint
   applyDiff(initial)
 }
 
@@ -14,20 +15,22 @@ function findNodeByUuid (uuid) {
   return document.querySelectorAll(`[wz-id="${uuid}"]`)[0]
 }
 
+// apply diff result to virtual dom
 function applyDiff (initial) {
   diffResult.forEach(diffItem => {
     const {type, node, position} = diffItem
     if (type === 'ADD_NODE') {
       walkTree(node, position)
-      window.tree = window.prevTree
+      updateContext(window.prevTree)
     }
     if (type === 'REMOVE_NODE') {
       position.removeChild(node)
-      window.tree = window.prevTree
+      updateContext(window.prevTree)
     }
     if (type === 'MODIFY_NODE') {
       // only className in the todo case
-      findNodeByUuid(diffItem.node).setAttribute('class', diffItem.content.className)
+      var attrName = Object.keys(diffItem.content)[0]
+      findNodeByUuid(diffItem.node)[attrName] = diffItem.content[attrName]
     }
   })
   diffResult = []
@@ -35,11 +38,11 @@ function applyDiff (initial) {
   //  move node
   diffResult.forEach(diffItem => {
     const {moveNode, positionNode} = diffItem
-    var mn = findNodeByUuid(moveNode.uuid)
-    var pn = findNodeByUuid(positionNode.uuid)
-    mn.parentNode.insertBefore(mn, pn)
+    var move = findNodeByUuid(moveNode.uuid) // the moved node
+    var destination = findNodeByUuid(positionNode.uuid) // node after moved node which should be inserted here
+    move.parentNode.insertBefore(move, destination)
   })
-  window.tree = window.prevTree
+  updateContext(window.prevTree)
 }
 
 /**
@@ -58,6 +61,7 @@ export function walkObj (root, curs, next) {
     let nextChild = next.child
     const loneOne = Math.max(cursChild.length, nextChild.length)
     const diffKey = diffByKey(curs.uuid, cursChild, nextChild)
+    // add add node to diff result
     while (diffKey.add.length > 0) {
       var adds = diffKey.add.shift()
       const {parent, node} = adds
@@ -68,6 +72,7 @@ export function walkObj (root, curs, next) {
       })
       cursChild.push(node)
     }
+    // add remove node to diff result
     while (diffKey.remove.length > 0) {
       var removes = diffKey.remove.pop()
       const {parent, node} = removes
@@ -78,13 +83,12 @@ export function walkObj (root, curs, next) {
       })
       curs.child = curs.child.filter(p => p.key !== node.key)
     }
-    // recurse child
     for (var i = 0; i < loneOne; i++) {
       walkObj('', cursChild[i], nextChild[i])
     }
   } else {
     // rebuild render
-    walkTree(window.tree)
+    walkTree(context)
   }
 }
 
@@ -98,9 +102,10 @@ function diffModify (cur, next) {
   for (var i = 0; i < next.length; i++) {
     if (cur[i] === undefined) return
     if (!isEqual(next[i].text, cur[i].text)) {
-      // dom text changed
+      // TODO diff text
     }
     for (var j = 0; j < next[i].attr.length; j++) {
+      // diff attr array
       if (!isEqual(next[i].attr[j], cur[i].attr[j])) {
         diffResult.push({
           type: 'MODIFY_NODE',
@@ -185,16 +190,16 @@ function reorder (parent, initial, accu, index, accuParent) {
 /**
  *
  * @param {string} parentId
- * @param {object} prevone
  * @param {object} currentone
+ * @param {object} nextone
  */
 function diffByKey (parentId, cur, next) {
   const result = {add: [], remove: []}
   // based on current
   next.forEach((item, index) => {
     if (item.key) {
-      var curObj = cur.find(w => w.key === item.key)
-      var nextObj = next.find(w => w.key === item.key)
+      var curObj = cur.find(c => c.key === item.key)
+      var nextObj = next.find(n => n.key === item.key)
       // add key
       if (curObj === undefined) {
         result.add.push({parent: parentId, node: nextObj})
@@ -213,9 +218,8 @@ function diffByKey (parentId, cur, next) {
   // based on previous
   cur.forEach((item, index) => {
     if (item.key) {
-      var curObj = cur.find(w => w.key === item.key)
-      var nextObj = next.find(w => w.key === item.key)
-
+      var curObj = cur.find(c => c.key === item.key)
+      var nextObj = next.find(n => n.key === item.key)
       // remove key
       if (nextObj === undefined) {
         result.remove.push({parent: parentId, node: curObj})

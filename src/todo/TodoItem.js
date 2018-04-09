@@ -17,7 +17,6 @@ export default class TodoItem extends Component {
      *  <div onClick={this.handleRemoveButtonClick}>x</div>
      * </div>
      */
-    const {count} = this.state
     const {title, complete} = this.props.todo
     var isComplete = complete ? 'complete' : 'title'
     return makeElement('div', {className: 'item'}, makeElement('div', {onclick: this.handleTodoTitleClick, className: isComplete}, title), makeElement('span', {onclick: this.handleRemoveButtonClick, className: 'remove'}, 'x'))
