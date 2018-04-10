@@ -59,7 +59,6 @@ export function walkObj (root, curs, next) {
     // compare child
     let cursChild = curs.child
     let nextChild = next.child
-    const loneOne = Math.max(cursChild.length, nextChild.length)
     const diffKey = diffByKey(curs.uuid, cursChild, nextChild)
     // add add node to diff result
     while (diffKey.add.length > 0) {
@@ -83,9 +82,6 @@ export function walkObj (root, curs, next) {
       })
       curs.child = curs.child.filter(p => p.key !== node.key)
     }
-    for (var i = 0; i < loneOne; i++) {
-      walkObj('', cursChild[i], nextChild[i])
-    }
   } else {
     // rebuild render
     walkTree(context)
@@ -93,30 +89,23 @@ export function walkObj (root, curs, next) {
 }
 
 /**
- *
- * @param {array} cur
- * @param {array} next
+ * diff the item attr and text who have same key
+ * @param {object} cur
+ * @param {object} next
  */
 function diffModify (cur, next) {
   if (next === undefined || cur === undefined) return
-  for (var i = 0; i < next.length; i++) {
-    if (cur[i] === undefined) return
-    if (!isEqual(next[i].text, cur[i].text)) {
-      // TODO diff text
-    }
-    for (var j = 0; j < next[i].attr.length; j++) {
-      // diff attr array
-      if (!isEqual(next[i].attr[j], cur[i].attr[j])) {
-        diffResult.push({
-          type: 'MODIFY_NODE',
-          node: cur[i].uuid,
-          content: next[i].attr[j]
-        })
-        cur[i].attr[j] = {...next[i].attr[j]}
-      }
-    }
-    if (cur[i].child.length > 0) {
-      diffModify(cur.child, next.child)
+  if (!isEqual(next.text, cur.text)) {
+    // TODO diff text
+  }
+  for (var i = 0; i < next.attr.length; i++) {
+    if (!isEqual(next.attr[i], cur.attr[i])) {
+      diffResult.push({
+        type: 'MODIFY_NODE',
+        node: cur.uuid,
+        content: next.attr[i]
+      })
+      cur.attr[i] = {...next.attr[i]}
     }
   }
 }
@@ -145,7 +134,7 @@ function reorder (parent, initial, accu, index, accuParent) {
   if (initial === undefined || accu === undefined) {
     return
   }
-  if (initial.key) {
+  if (initial.key !== undefined) {
     // need move node
     if (initial.key !== accu.key) {
       var accuChilds = accuParent.child
@@ -190,51 +179,34 @@ function reorder (parent, initial, accu, index, accuParent) {
 /**
  *
  * @param {string} parentId
- * @param {object} currentone
- * @param {object} nextone
+ * @param {array} currentone
+ * @param {array} nextone
+ * @returns {object} the item that new adds and removes
  */
 function diffByKey (parentId, cur, next) {
+  const temp = cur.map(item => item.key)
   const result = {add: [], remove: []}
   // based on current
   next.forEach((item, index) => {
-    if (item.key) {
+    if (item.key !== undefined) {
       var curObj = cur.find(c => c.key === item.key)
       var nextObj = next.find(n => n.key === item.key)
       // add key
       if (curObj === undefined) {
-        result.add.push({parent: parentId, node: nextObj})
+        result.add.push({parent: parentId, node: nextObj, index})
       }
-      // change key
       if (curObj !== undefined && nextObj !== undefined) {
-        // change attr
-        if (curObj.child.length > 0 && nextObj.child.length > 0) {
-          // diff child attr
-          diffModify(curObj.child, nextObj.child)
-          walkObj(parentId, curObj, nextObj)
-        }
+        // same key
+        diffModify(curObj, nextObj)
+        walkObj(parentId, curObj, nextObj)
+        temp.splice(temp.indexOf(item.key), 1)
       }
     }
   })
-  // based on previous
-  cur.forEach((item, index) => {
-    if (item.key) {
-      var curObj = cur.find(c => c.key === item.key)
-      var nextObj = next.find(n => n.key === item.key)
-      // remove key
-      if (nextObj === undefined) {
-        result.remove.push({parent: parentId, node: curObj})
-      }
-      // change key
-      if (curObj !== undefined && nextObj !== undefined) {
-        // change attr
-
-        if (curObj.child.length > 0 && nextObj.child.length > 0) {
-          // diff child attr
-          diffModify(curObj.child, nextObj.child)
-          walkObj(parentId, curObj, nextObj)
-        }
-      }
-    }
+  temp.forEach(item => {
+    var curObj = cur.find(c => c.key === item)
+    var index = getIndexOfArray(cur, item)
+    result.remove.push({parent: parentId, node: curObj, index})
   })
   return result
 }
