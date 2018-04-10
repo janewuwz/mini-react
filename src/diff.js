@@ -59,7 +59,6 @@ export function walkObj (root, curs, next) {
     // compare child
     let cursChild = curs.child
     let nextChild = next.child
-    const loneOne = Math.max(cursChild.length, nextChild.length)
     const diffKey = diffByKey(curs.uuid, cursChild, nextChild)
     // add add node to diff result
     while (diffKey.add.length > 0) {
@@ -82,9 +81,6 @@ export function walkObj (root, curs, next) {
         node: findNodeByUuid(node.uuid)
       })
       curs.child = curs.child.filter(p => p.key !== node.key)
-    }
-    for (var i = 0; i < loneOne; i++) {
-      walkObj('', cursChild[i], nextChild[i])
     }
   } else {
     // rebuild render
@@ -190,8 +186,8 @@ function reorder (parent, initial, accu, index, accuParent) {
 /**
  *
  * @param {string} parentId
- * @param {object} currentone
- * @param {object} nextone
+ * @param {array} currentone
+ * @param {array} nextone
  */
 function diffByKey (parentId, cur, next) {
   const result = {add: [], remove: []}
@@ -207,10 +203,10 @@ function diffByKey (parentId, cur, next) {
       // change key
       if (curObj !== undefined && nextObj !== undefined) {
         // change attr
+        walkObj(parentId, curObj, nextObj)
         if (curObj.child.length > 0 && nextObj.child.length > 0) {
           // diff child attr
           diffModify(curObj.child, nextObj.child)
-          walkObj(parentId, curObj, nextObj)
         }
       }
     }
@@ -223,16 +219,6 @@ function diffByKey (parentId, cur, next) {
       // remove key
       if (nextObj === undefined) {
         result.remove.push({parent: parentId, node: curObj})
-      }
-      // change key
-      if (curObj !== undefined && nextObj !== undefined) {
-        // change attr
-
-        if (curObj.child.length > 0 && nextObj.child.length > 0) {
-          // diff child attr
-          diffModify(curObj.child, nextObj.child)
-          walkObj(parentId, curObj, nextObj)
-        }
       }
     }
   })
