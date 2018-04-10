@@ -193,7 +193,7 @@ function diffByKey (parentId, cur, next) {
       var nextObj = next.find(n => n.key === item.key)
       // add key
       if (curObj === undefined) {
-        result.add.push({parent: parentId, node: nextObj})
+        result.add.push({parent: parentId, node: nextObj, index})
       }
       if (curObj !== undefined && nextObj !== undefined) {
         // same key
@@ -205,7 +205,8 @@ function diffByKey (parentId, cur, next) {
   })
   temp.forEach(item => {
     var curObj = cur.find(c => c.key === item)
-    result.remove.push({parent: parentId, node: curObj})
+    var index = getIndexOfArray(cur, item)
+    result.remove.push({parent: parentId, node: curObj, index})
   })
   return result
 }
