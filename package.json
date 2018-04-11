@@ -14,5 +14,22 @@
   },
   "devDependencies": {
     "babel-plugin-transform-react-jsx": "^6.24.1"
-  }
+  },
+  "description": "mini-react",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/janewuwz/wz.git"
+  },
+  "keywords": [
+    "react",
+    "virtual-dom",
+    "diff"
+  ],
+  "author": "wz",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/janewuwz/wz/issues"
+  },
+  "homepage": "https://github.com/janewuwz/wz#readme"
 }
