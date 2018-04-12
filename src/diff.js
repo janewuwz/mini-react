@@ -3,9 +3,9 @@ import cloneDeep from './utils/cloneDeep'  // I know why to need expose
 import isEqual from './utils/isEqual'
 import {context, updateContext} from './wz'
 
-let diffResult = []
+let patchArr = []
 export default function diff (nextTree, curTree) {
-  diffResult = []
+  patchArr = []
   walkObj('root', curTree, nextTree)
   var initial = cloneDeep(nextTree) // the blueprint
   applyDiff(initial)
@@ -17,7 +17,7 @@ function findNodeByUuid (uuid) {
 
 // apply diff result to virtual dom
 function applyDiff (initial) {
-  diffResult.forEach(diffItem => {
+  patchArr.forEach(diffItem => {
     const {type, node, position} = diffItem
     if (type === 'ADD_NODE') {
       walkTree(node, position)
@@ -37,10 +37,10 @@ function applyDiff (initial) {
       position.replaceChild(newNode, oldNode)
     }
   })
-  diffResult = []
+  patchArr = []
   reorder('', initial, window.prevTree)
   //  move node
-  diffResult.forEach(diffItem => {
+  patchArr.forEach(diffItem => {
     const {moveNode, positionNode} = diffItem
     var move = findNodeByUuid(moveNode.uuid) // the moved node
     var destination = findNodeByUuid(positionNode.uuid) // node after moved node which should be inserted here
@@ -68,7 +68,7 @@ export function walkObj (root, curs, next) {
     while (diffKey.add.length > 0) {
       var adds = diffKey.add.shift()
       const {parent, node} = adds
-      diffResult.push({
+      patchArr.push({
         type: 'ADD_NODE',
         position: findNodeByUuid(parent),
         node: node
@@ -79,7 +79,7 @@ export function walkObj (root, curs, next) {
     while (diffKey.remove.length > 0) {
       var removes = diffKey.remove.pop()
       const {parent, node} = removes
-      diffResult.push({
+      patchArr.push({
         type: 'REMOVE_NODE',
         position: findNodeByUuid(parent),
         node: findNodeByUuid(node.uuid)
@@ -92,7 +92,7 @@ export function walkObj (root, curs, next) {
       const {parent, newNode, oldNode} = replaces
       const parentNode = findNodeByUuid(parent)
       const newEl = walkTree(newNode)
-      diffResult.push({
+      patchArr.push({
         type: 'REPLACE_NODE',
         position: parentNode,
         newNode: newEl,
@@ -117,7 +117,7 @@ function diffModify (cur, next) {
   }
   for (var i = 0; i < next.attr.length; i++) {
     if (!isEqual(next.attr[i], cur.attr[i])) {
-      diffResult.push({
+      patchArr.push({
         type: 'MODIFY_NODE',
         node: cur.uuid,
         content: next.attr[i]
@@ -167,7 +167,7 @@ function reorder (parent, initial, accu, index, accuParent) {
       if (initChilds[index - 1]) {
         const lastOneKey = initChilds[index - 1].key
         const positionIndex = getIndexOfArray(accuChilds, lastOneKey) + 1
-        diffResult.push({
+        patchArr.push({
           type: 'MOVE_NODE',
           moveNode: moveObj,
           positionNode: accuChilds[positionIndex]
@@ -179,7 +179,7 @@ function reorder (parent, initial, accu, index, accuParent) {
         insertItem(accuChilds, change, moveObj)
       } else {
         // the move node is the first node
-        diffResult.push({
+        patchArr.push({
           type: 'MOVE_NODE',
           moveNode: moveObj,
           positionNode: accuChilds[0]
