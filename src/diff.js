@@ -32,6 +32,9 @@ function applyDiff (initial) {
       var attrName = Object.keys(diffItem.content)[0]
       findNodeByUuid(diffItem.node)[attrName] = diffItem.content[attrName]
     }
+    // if (type === 'REPLACE_NODE') {
+    //   position.replaceChild(newNode, oldNode)
+    // }
   })
   diffResult = []
   reorder('', initial, window.prevTree)
@@ -82,6 +85,19 @@ export function walkObj (root, curs, next) {
       })
       curs.child = curs.child.filter(p => p.key !== node.key)
     }
+    // replace child
+    // while (diffKey.replace.length > 0) {
+    //   var replaces = diffKey.replace.shift()
+    //   const {parent, newNode, oldNode} = replaces
+    //   const parentNode = findNodeByUuid(parent)
+    //   const newEl = walkTree(newNode)
+    //   diffResult.push({
+    //     type: 'REPLACE_NODE',
+    //     position: parentNode,
+    //     newNode: newEl,
+    //     oldNode: findNodeByUuid(oldNode.uuid)
+    //   })
+    // }
   } else {
     // rebuild render
     walkTree(context)
@@ -120,6 +136,12 @@ function delItem (arr, targetIndex) {
 
 function insertItem (arr, position, newItem) {
   arr.splice(position, 0, newItem)
+}
+
+function replaceItem (arr, newone, oldone) {
+  var index = getIndexOfArray(arr, oldone.key)
+  arr.splice(index, 1, newone)
+  return arr
 }
 
 /**
@@ -184,29 +206,41 @@ function reorder (parent, initial, accu, index, accuParent) {
  * @returns {object} the item that new adds and removes
  */
 function diffByKey (parentId, cur, next) {
-  const temp = cur.map(item => item.key)
-  const result = {add: [], remove: []}
+  let temp = cur.map(item => item.key)
+  const result = {add: [], remove: [], replace: []}
   // based on current
-  next.forEach((item, index) => {
+  for (var i = 0; i < next.length; i++) {
+    var item = next[i]
     if (item.key !== undefined) {
       var curObj = cur.find(c => c.key === item.key)
       var nextObj = next.find(n => n.key === item.key)
-      // add key
-      if (curObj === undefined) {
-        result.add.push({parent: parentId, node: nextObj, index})
-      }
       if (curObj !== undefined && nextObj !== undefined) {
         // same key
         diffModify(curObj, nextObj)
         walkObj(parentId, curObj, nextObj)
         temp.splice(temp.indexOf(item.key), 1)
       }
+      // add key
+      if (curObj === undefined) {
+        // var compare = temp[i]
+        // var isIn = getIndexOfArray(next, compare)
+        // if (compare !== undefined && isIn === -1) {
+        //   // replace
+        //   result.replace.push({parent: parentId, newNode: nextObj, oldNode: cur[i]})
+        //   replaceItem(cur, nextObj, cur[i])
+        // }
+        result.add.push({parent: parentId, node: nextObj})
+      }
     }
-  })
-  temp.forEach(item => {
-    var curObj = cur.find(c => c.key === item)
-    var index = getIndexOfArray(cur, item)
-    result.remove.push({parent: parentId, node: curObj, index})
+  }
+  cur.forEach(item => {
+    if (item.key !== undefined) {
+      var curObj = cur.find(c => c.key === item.key)
+      var nextObj = next.find(n => n.key === item.key)
+      if (nextObj === undefined) {
+        result.remove.push({parent: parentId, node: curObj})
+      }
+    }
   })
   return result
 }

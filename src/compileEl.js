@@ -26,6 +26,9 @@ export function walkTree (element, parent) {
       dom[key] = item[key]
     })
   }
+  if (parent === undefined) {
+    return dom
+  }
   parent.appendChild(dom)
   if (element.text && element.text !== '') {
     dom.appendChild(document.createTextNode(element.text))
