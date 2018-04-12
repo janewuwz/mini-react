@@ -32,9 +32,10 @@ function applyDiff (initial) {
       var attrName = Object.keys(diffItem.content)[0]
       findNodeByUuid(diffItem.node)[attrName] = diffItem.content[attrName]
     }
-    // if (type === 'REPLACE_NODE') {
-    //   position.replaceChild(newNode, oldNode)
-    // }
+    if (type === 'REPLACE_NODE') {
+      const {newNode, oldNode} = diffItem
+      position.replaceChild(newNode, oldNode)
+    }
   })
   diffResult = []
   reorder('', initial, window.prevTree)
@@ -86,18 +87,18 @@ export function walkObj (root, curs, next) {
       curs.child = curs.child.filter(p => p.key !== node.key)
     }
     // replace child
-    // while (diffKey.replace.length > 0) {
-    //   var replaces = diffKey.replace.shift()
-    //   const {parent, newNode, oldNode} = replaces
-    //   const parentNode = findNodeByUuid(parent)
-    //   const newEl = walkTree(newNode)
-    //   diffResult.push({
-    //     type: 'REPLACE_NODE',
-    //     position: parentNode,
-    //     newNode: newEl,
-    //     oldNode: findNodeByUuid(oldNode.uuid)
-    //   })
-    // }
+    while (diffKey.replace.length > 0) {
+      var replaces = diffKey.replace.shift()
+      const {parent, newNode, oldNode} = replaces
+      const parentNode = findNodeByUuid(parent)
+      const newEl = walkTree(newNode)
+      diffResult.push({
+        type: 'REPLACE_NODE',
+        position: parentNode,
+        newNode: newEl,
+        oldNode: findNodeByUuid(oldNode.uuid)
+      })
+    }
   } else {
     // rebuild render
     walkTree(context)
@@ -222,14 +223,15 @@ function diffByKey (parentId, cur, next) {
       }
       // add key
       if (curObj === undefined) {
-        // var compare = temp[i]
-        // var isIn = getIndexOfArray(next, compare)
-        // if (compare !== undefined && isIn === -1) {
-        //   // replace
-        //   result.replace.push({parent: parentId, newNode: nextObj, oldNode: cur[i]})
-        //   replaceItem(cur, nextObj, cur[i])
-        // }
-        result.add.push({parent: parentId, node: nextObj})
+        var compare = temp[i]
+        var isIn = getIndexOfArray(next, compare)
+        if (compare !== undefined && isIn === -1) {
+          // replace
+          result.replace.push({parent: parentId, newNode: nextObj, oldNode: cur[i]})
+          replaceItem(cur, nextObj, cur[i])
+        } else {
+          result.add.push({parent: parentId, node: nextObj})
+        }
       }
     }
   }
