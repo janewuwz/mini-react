@@ -1,3 +1,5 @@
+/** @jsx makeElement */
+
 import {Component, makeElement} from '../wz'
 import './style.css'
 
@@ -14,9 +16,6 @@ export default class TodoInput extends Component {
     }
   }
   render () {
-    /**
-     * <input type="text" class="input" onKeyPress={this.handleKeyPress} />
-     */
-    return makeElement('input', {type: 'text', onkeypress: this.handleKeyPress, className: 'input', placeholder: 'What need to do?'}, '')
+    return <input type="text" className="input" onkeypress={this.handleKeyPress} placeholder="What need to do?" />
   }
 }

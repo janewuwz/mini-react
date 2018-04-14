@@ -1,3 +1,5 @@
+/** @jsx makeElement */
+
 import {Component, makeElement} from '../wz'
 import TodoList from './TodoList'
 import TodoInput from './TodoInput'
@@ -53,15 +55,6 @@ export default class TodoApp extends Component {
 
 
   render () {
-    /**
-      <div className="TodoApp">
-        <TodoInput onTodoItemAdded={this.handleTodoItemAdded} />
-        <TodoList
-          todos={todos}
-          onTodoItemToggled={this.handleTodoItemToggled}
-          onTodoItemRemoved={this.handleTodoItemRemoved} />
-      </div>
-     */
     const { todos, show } = this.state;
     let showTodos
     if (show === 'completed') {
@@ -71,6 +64,14 @@ export default class TodoApp extends Component {
     } else {
       showTodos = todos
     }
-    return makeElement('div', {className: 'wrapper'}, makeElement('h2', {className: 'app'}, 'Todo App'), makeElement(TodoInput, {'onTodoItemAdded': this.handleTodoItemAdded}, ''), makeElement(TodoList, {todos: showTodos, 'onTodoItemToggled': this.handleTodoItemToggled, 'onTodoItemRemoved': this.handleTodoItemRemoved}, ''), makeElement(TodoFilter, {getFilter: this.handleFilter, show}, ''))
+    return <div className="wrapper">
+        <h2 className="app">Todo App</h2>
+        <TodoInput onTodoItemAdded={this.handleTodoItemAdded} />
+        <TodoList
+          todos={showTodos}
+          onTodoItemToggled={this.handleTodoItemToggled}
+          onTodoItemRemoved={this.handleTodoItemRemoved} />
+        <TodoFilter getFilter={this.handleFilter} show={show} />
+      </div>
   }
 }

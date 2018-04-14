@@ -1,7 +1,5 @@
 {
   "plugins": [
-    ["transform-react-jsx", {
-      "pragma": "makeElement" // default pragma is React.createElement
-    }]
+    ["transform-react-jsx"]
   ]
 }
