@@ -1,4 +1,4 @@
-# mini-react
+# toy-react
 ---
 
 ### Getting Started
